@@ -1,0 +1,8 @@
+- file: intro
+
+- header: Machine Learning with MNIST
+- file: mnist/mnist_sklearn
+- file: mnist/mnist_pytorch
+
+- header: Large Movie Review Dataset
+- file: movie/movie

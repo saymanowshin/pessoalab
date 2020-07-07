@@ -1,0 +1,3 @@
+# About Me
+
+I'm Jason Liu, a senior at Montgomery Blair High School. During the summer of 2020, I worked as an intern at the [Laboratory of Cognition & Emotion](http://www.lce.umd.edu/index.html) at the University of Maryland under Dr. Luiz Pessoa, where I worked on using machine learning and neural networks to analyze brain data. This website serves as a documentation of all work that I have done during this internship.  

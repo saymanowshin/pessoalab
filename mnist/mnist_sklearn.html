@@ -1,0 +1,768 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers &#8212; Jason Liu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/sphinx-book-theme.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/mystnb.js"></script>
+    <script src="../_static/sphinx-book-theme.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Machine Learning in PyTorch" href="mnist_pytorch.html" />
+    <link rel="prev" title="About Me" href="../intro.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="../index.html">
+  
+  <img src="../_static/logo.png" class="logo" alt="logo">
+  
+  
+  <h1 class="site-logo" id="site-title">Jason Liu</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  
+  <ul class="nav sidenav_l1">
+<li class="navbar-special">
+<p class="margin-caption">Machine Learning with MNIST</p>
+</li>
+  <li class="active">
+    <a href="">When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers</a>
+  </li>
+  <li class="">
+    <a href="mnist_pytorch.html">Machine Learning in PyTorch</a>
+  </li>
+<li class="navbar-special">
+<p class="margin-caption">Large Movie Review Dataset</p>
+</li>
+  <li class="">
+    <a href="../movie/movie.html">Movie Review Semantic Analysis</a>
+  </li>
+</ul>
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../_sources/mnist/mnist_sklearn.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
+    <div class="dropdown-buttons sourcebuttons">
+        <a class="repository-button"
+            href="https://github.com/jasoneliu/pessoalab"><button type="button" class="btn btn-secondary topbarbtn"
+                data-toggle="tooltip" data-placement="left" title="Source repository"><i
+                    class="fab fa-github"></i>repository</button></a>
+        <a class="issues-button"
+            href="https://github.com/jasoneliu/pessoalab/issues/new?title=Issue%20on%20page%20%2Fmnist/mnist_sklearn.html&body=Your%20issue%20content%20here."><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Open an issue"><i class="fas fa-lightbulb"></i>open issue</button></a>
+        <a class="edit-button" href="https://github.com/jasoneliu/pessoalab/edit/master/mnist/mnist_sklearn.ipynb"><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Edit this page"><i class="fas fa-pencil-alt"></i>suggest edit</button></a>
+    </div>
+</div>
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+    </div>
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#mnist-dataset" class="nav-link">MNIST Dataset</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#logistic-regression" class="nav-link">Logistic Regression</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#support-vector-machines" class="nav-link">Support Vector Machines</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#linear-kernel" class="nav-link">Linear Kernel</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#polynomial-kernel" class="nav-link">Polynomial Kernel</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#rbf-kernel" class="nav-link">RBF Kernel</a>
+        </li>
+    
+            </ul>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#naive-bayes-classifiers" class="nav-link">Naive Bayes Classifiers</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#gaussian-naive-bayes" class="nav-link">Gaussian Naive Bayes</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#multinomial-naive-bayes" class="nav-link">Multinomial Naive Bayes</a>
+        </li>
+    
+            </ul>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#analysis-which-classifier-to-use" class="nav-link">Analysis: Which Classifier to Use</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#other-classifiers" class="nav-link">Other Classifiers</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#ensemble-methods" class="nav-link">Ensemble Methods</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h4">
+            <a href="#random-forest-classifier" class="nav-link">Random Forest Classifier</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h4">
+            <a href="#gradient-boosting-classifier" class="nav-link">Gradient Boosting Classifier</a>
+        </li>
+    
+            </ul>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#neural-networks" class="nav-link">Neural Networks</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h4">
+            <a href="#multi-layer-perceptron" class="nav-link">Multi-layer Perceptron</a>
+        </li>
+    
+            </ul>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#comparison-with-logistic-regression-svms-and-naive-bayes" class="nav-link">Comparison With Logistic Regression, SVMs, and Naive Bayes</a>
+        </li>
+    
+            </ul>
+        </li>
+    
+    </ul>
+</nav>
+
+
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/jasoneliu/pessoalab/edit/master/mnist/mnist_sklearn.ipynb">
+        <i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="when-to-use-logistic-regression-vs-support-vector-machines-vs-naive-bayes-classifiers">
+<h1>When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers<a class="headerlink" href="#when-to-use-logistic-regression-vs-support-vector-machines-vs-naive-bayes-classifiers" title="Permalink to this headline">¶</a></h1>
+<p>6/30/2020</p>
+<p>In classification problems, a variety of supervised learning techniques can be used. In this report, we evaluate the benefits and drawbacks of three common classifiers using the MNIST dataset and scikit-learn, a python machine learning library.</p>
+<div class="section" id="mnist-dataset">
+<h2>MNIST Dataset<a class="headerlink" href="#mnist-dataset" title="Permalink to this headline">¶</a></h2>
+<p>The MNIST dataset is a collection of 70,000 28x28 pixel grayscale images of handwritten digits (0-9), with each pixel corresponding to an integer between 0 (black) and 255 (white).</p>
+<p>For classification, each pixel will be a feature. Feature scaling is used to constrain features between 0.0 and 1.0. Since the digits are distributed fairly evenly, accuracy can be used to evaluate the model rather than precision, recall, or F1 score.</p>
+<p>The dataset is split into two datasets: one full size dataset (70,000 images), one 10% size dataset (7,000 images)<br />
+Each dataset is split into sets:</p>
+<ul class="simple">
+<li><p>70% training - train model / set parameters</p>
+<ul>
+<li><p>3-fold cross validation  - tune hyperparameters, plot accuracy to detect underfitting/overfitting</p></li>
+</ul>
+</li>
+<li><p>30% validation (holdout) - evaluate final classification accuracy</p></li>
+</ul>
+<p>Begin with some imports:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_openml</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span>
+<span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="kn">import</span> <span class="n">GaussianNB</span><span class="p">,</span> <span class="n">MultinomialNB</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">GradientBoostingClassifier</span><span class="p">,</span> <span class="n">AdaBoostClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.neural_network</span> <span class="kn">import</span> <span class="n">MLPClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span><span class="p">,</span> <span class="n">GridSearchCV</span><span class="p">,</span> <span class="n">validation_curve</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">set_matplotlib_formats</span>
+<span class="n">set_matplotlib_formats</span><span class="p">(</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The full MNIST dataset needs to normalized and split into training and validation sets. We can also show some examples of the handwritten digits in the dataset:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s1">&#39;mnist_784&#39;</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">/</span><span class="mf">255.0</span>
+
+<span class="n">x_train</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">x_throwaway</span><span class="p">,</span> <span class="n">x_small</span><span class="p">,</span> <span class="n">y_throwaway</span><span class="p">,</span> <span class="n">y_small</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x_train_small</span><span class="p">,</span> <span class="n">x_test_small</span><span class="p">,</span> <span class="n">y_train_small</span><span class="p">,</span> <span class="n">y_test_small</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">x_small</span><span class="p">,</span> <span class="n">y_small</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="n">y_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">])):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;y = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">),</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="mi">28</span><span class="p">,</span><span class="mi">28</span><span class="p">)),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;MNIST Data Examples&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/mnist_sklearn_5_0.png" src="../_images/mnist_sklearn_5_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="logistic-regression">
+<h2>Logistic Regression<a class="headerlink" href="#logistic-regression" title="Permalink to this headline">¶</a></h2>
+<p>Logistic regression is a discriminative model, meaning that it learns the decision boundary between classes. In binary classification, this involves a hypothesis <span class="math notranslate nohighlight">\(h_\theta(x)=\frac{1}{1+e^{\theta^Tx}}\)</span> representing the probability <span class="math notranslate nohighlight">\(P(y|x)\)</span> that a given data point with features x belongs to class y. The logistic function allows for the probabilistic representation since it restricts y to values between 0 and 1.</p>
+<p>Classification is determined based on the greater probability between <span class="math notranslate nohighlight">\(P(y=0|x)\)</span> and <span class="math notranslate nohighlight">\(P(y=1|x)\)</span>. The decision boundary is created at an equal probability of both classes, which occurs at <span class="math notranslate nohighlight">\(h_\theta(x)=0.5\)</span> or <span class="math notranslate nohighlight">\(\theta^Tx=0\)</span>. Though typically linear, this decision boundary can become non-linear by creating new features that are polynomial terms of previous features.</p>
+<p>A cost function <span class="math notranslate nohighlight">\(J(\theta)\)</span> is defined to measure the error in the model’s classification accuracy across all training examples. The model minimizes <span class="math notranslate nohighlight">\(J(\theta)\)</span> using an optimization algorithm such as gradient descent or L-BFGS in order to find the <span class="math notranslate nohighlight">\(\theta\)</span> that results in the lowest cost or greatest classification accuracy. Regularization is applied to address overfitting. An extra term called a penalty is added to <span class="math notranslate nohighlight">\(J(\theta)\)</span>, though it also introduces a hyperparameter <span class="math notranslate nohighlight">\(C\)</span> that needs to be optimized as well.</p>
+<p>In multiclass classification, the one-vs-rest method is used. All classes except for one are grouped together into one class, creating two classes and allowing for binary classification. This process repeats for all individual classes and the model predics the class with the greatest <span class="math notranslate nohighlight">\(P(y|x)\)</span>.</p>
+<p>We start by finding the best hyperparameters (primarily learning rate) for our logistic regression model using a grid search:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">grid</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+    <span class="n">grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">error_score</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="n">clf</span><span class="p">,</span>
+        <span class="n">iid</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">param_grid</span> <span class="o">=</span> <span class="n">params</span><span class="p">,</span>
+        <span class="n">return_train_score</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">scoring</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cv</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> 
+    <span class="n">grid_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tuning time:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">time_start</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best parameters:&#39;</span><span class="p">,</span> <span class="n">grid_search</span><span class="o">.</span><span class="n">best_params_</span><span class="p">)</span>
+
+<span class="n">clf</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.33</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;solver&#39;</span><span class="p">:[</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">],</span> <span class="s1">&#39;tol&#39;</span><span class="p">:[</span><span class="mf">0.001</span><span class="p">],</span> <span class="s1">&#39;penalty&#39;</span><span class="p">:[</span><span class="s1">&#39;l2&#39;</span><span class="p">],</span> <span class="s1">&#39;max_iter&#39;</span><span class="p">:[</span><span class="mi">50</span><span class="p">],</span> <span class="s1">&#39;multi_class&#39;</span><span class="p">:[</span><span class="s1">&#39;ovr&#39;</span><span class="p">]}</span>
+<span class="n">grid</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Tuning time: 59.016s
+Best parameters: {&#39;C&#39;: 0.33, &#39;max_iter&#39;: 50, &#39;multi_class&#39;: &#39;ovr&#39;, &#39;penalty&#39;: &#39;l2&#39;, &#39;solver&#39;: &#39;lbfgs&#39;, &#39;tol&#39;: 0.001}
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we let our model train on a training set, then test its accuracy on a validation set:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">clf</span><span class="p">):</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+    <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Large dataset:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\u2022</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;Training time:</span><span class="se">\t</span><span class="s1">   </span><span class="si">%.3f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">time_start</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\u2022</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;Training set accuracy:   </span><span class="si">%.3f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_train</span><span class="p">))</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\u2022</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;Validation set accuracy: </span><span class="si">%.3f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_test</span><span class="p">))</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">train_small</span><span class="p">(</span><span class="n">clf</span><span class="p">):</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+    <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train_small</span><span class="p">,</span> <span class="n">y_train_small</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Small dataset:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\u2022</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;Training time:</span><span class="se">\t</span><span class="s1">   </span><span class="si">%.3f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">time_start</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\u2022</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;Training set accuracy:   </span><span class="si">%.3f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_train_small</span><span class="p">,</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_train_small</span><span class="p">))</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\u2022</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;Validation set accuracy: </span><span class="si">%.3f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test_small</span><span class="p">,</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_test_small</span><span class="p">))</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">log_reg</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">0.33</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+<span class="n">train</span><span class="p">(</span><span class="n">log_reg</span><span class="p">)</span>
+<span class="n">train_small</span><span class="p">(</span><span class="n">log_reg</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Large dataset:
+• Training time:	   18.075s
+• Training set accuracy:   92.627%
+• Validation set accuracy: 91.238%
+
+Small dataset:
+• Training time:	   2.062s
+• Training set accuracy:   94.469%
+• Validation set accuracy: 89.905%
+</pre></div>
+</div>
+</div>
+</div>
+<p>To watch for overfitting, we plot the accuracy of both training and validation sets as a function of the number of training epochs. The goal of minimal overfitting should yield similar accuracy for both sets, as shown by the large dataset:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">validation_curves</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">y_low</span><span class="p">,</span> <span class="n">y_high</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="n">train_scores</span><span class="p">,</span> <span class="n">test_scores</span> <span class="o">=</span> <span class="n">validation_curve</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">param_name</span><span class="o">=</span><span class="s1">&#39;max_iter&#39;</span><span class="p">,</span> <span class="n">param_range</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">train_scores_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">test_scores_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">test_scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">train_scores_small</span><span class="p">,</span> <span class="n">test_scores_small</span> <span class="o">=</span> <span class="n">validation_curve</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">x_train_small</span><span class="p">,</span> <span class="n">y_train_small</span><span class="p">,</span> <span class="n">param_name</span><span class="o">=</span><span class="s1">&#39;max_iter&#39;</span><span class="p">,</span> <span class="n">param_range</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">train_scores_mean_small</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_scores_small</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">test_scores_mean_small</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">test_scores_small</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Validation Curve for &#39;</span><span class="o">+</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Epochs&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">y_low</span><span class="p">,</span> <span class="n">y_high</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">train_scores_mean</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Large Training Set&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;paleturquoise&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">test_scores_mean</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Large Validation Set&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;royalblue&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">train_scores_mean_small</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Small Training Set&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;peachpuff&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">test_scores_mean_small</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Small Validation Set&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orangered&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower center&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">35</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">45</span><span class="p">,</span><span class="mi">50</span><span class="p">]</span>
+<span class="n">log_reg</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">0.33</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+<span class="n">validation_curves</span><span class="p">(</span><span class="n">log_reg</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="s1">&#39;Logistic Regression&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/mnist_sklearn_12_0.png" src="../_images/mnist_sklearn_12_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="support-vector-machines">
+<h2>Support Vector Machines<a class="headerlink" href="#support-vector-machines" title="Permalink to this headline">¶</a></h2>
+<p>A SVM is another discriminative model similar to logistic regression in the sense that they have a similar cost function, with the softmax function being approximated with a linear rectifier. The cost function (with regularization) is also minimized to maximize classification accuracy and the one-vs-rest method is used for multiclass classification.</p>
+<p>A key difference is that SVMs are capable of large margin classification, meaning that they maximize the distance between the data and the decision boundary, which is also called a hyperplane. The hyperplane is defined by support vectors, which are created from points in each class closest to the decision boundary.</p>
+<p>Kernels allow SVMs to perform nonlinear classification by defining new features based on similarity with chosen landmarks, then training based on the same cost function. The similarity function is defined by the kernel, which often adds more hyperparaters such as <span class="math notranslate nohighlight">\(\gamma\)</span> in the Gaussian/RBF kernel. When no kernel is used, the model is often referred to as using a linear kernel.</p>
+<div class="section" id="linear-kernel">
+<h3>Linear Kernel<a class="headerlink" href="#linear-kernel" title="Permalink to this headline">¶</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">svm_lin</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">decision_function_shape</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+<span class="n">train</span><span class="p">(</span><span class="n">svm_lin</span><span class="p">)</span>
+<span class="n">train_small</span><span class="p">(</span><span class="n">svm_lin</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Large dataset:
+• Training time:	   70.645s
+• Training set accuracy:   71.510%
+• Validation set accuracy: 70.662%
+
+Small dataset:
+• Training time:	   4.946s
+• Training set accuracy:   92.918%
+• Validation set accuracy: 87.524%
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="polynomial-kernel">
+<h3>Polynomial Kernel<a class="headerlink" href="#polynomial-kernel" title="Permalink to this headline">¶</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">decision_function_shape</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:[</span><span class="mf">3.33</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mf">33.33</span><span class="p">],</span> <span class="s1">&#39;gamma&#39;</span><span class="p">:[</span><span class="s1">&#39;scale&#39;</span><span class="p">],</span> <span class="s1">&#39;kernel&#39;</span><span class="p">:[</span><span class="s1">&#39;rbf&#39;</span><span class="p">],</span> <span class="s1">&#39;tol&#39;</span><span class="p">:[</span><span class="mf">0.001</span><span class="p">],</span> <span class="s1">&#39;max_iter&#39;</span><span class="p">:[</span><span class="mi">50</span><span class="p">],</span> <span class="s1">&#39;decision_function_shape&#39;</span><span class="p">:[</span><span class="s1">&#39;ovr&#39;</span><span class="p">]}</span>
+<span class="n">grid</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Tuning time: 873.508s
+Best parameters: {&#39;C&#39;: 3.33, &#39;decision_function_shape&#39;: &#39;ovr&#39;, &#39;gamma&#39;: &#39;scale&#39;, &#39;kernel&#39;: &#39;rbf&#39;, &#39;max_iter&#39;: 50, &#39;tol&#39;: 0.001}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">svm_poly</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">decision_function_shape</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+<span class="n">train</span><span class="p">(</span><span class="n">svm_poly</span><span class="p">)</span>
+<span class="n">train_small</span><span class="p">(</span><span class="n">svm_poly</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Large dataset:
+• Training time:	   72.120s
+• Training set accuracy:   83.833%
+• Validation set accuracy: 83.129%
+
+Small dataset:
+• Training time:	   5.937s
+• Training set accuracy:   97.327%
+• Validation set accuracy: 91.381%
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="rbf-kernel">
+<h3>RBF Kernel<a class="headerlink" href="#rbf-kernel" title="Permalink to this headline">¶</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">decision_function_shape</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:[</span><span class="mf">3.33</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mf">33.33</span><span class="p">],</span> <span class="s1">&#39;gamma&#39;</span><span class="p">:[</span><span class="s1">&#39;scale&#39;</span><span class="p">],</span> <span class="s1">&#39;kernel&#39;</span><span class="p">:[</span><span class="s1">&#39;rbf&#39;</span><span class="p">],</span> <span class="s1">&#39;tol&#39;</span><span class="p">:[</span><span class="mf">0.001</span><span class="p">],</span> <span class="s1">&#39;max_iter&#39;</span><span class="p">:[</span><span class="mi">50</span><span class="p">],</span> <span class="s1">&#39;decision_function_shape&#39;</span><span class="p">:[</span><span class="s1">&#39;ovr&#39;</span><span class="p">]}</span>
+<span class="n">grid</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Tuning time: 868.069s
+Best parameters: {&#39;C&#39;: 3.33, &#39;decision_function_shape&#39;: &#39;ovr&#39;, &#39;gamma&#39;: &#39;scale&#39;, &#39;kernel&#39;: &#39;rbf&#39;, &#39;max_iter&#39;: 50, &#39;tol&#39;: 0.001}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">svm_rbf</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">decision_function_shape</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+<span class="n">train</span><span class="p">(</span><span class="n">svm_rbf</span><span class="p">)</span>
+<span class="n">train_small</span><span class="p">(</span><span class="n">svm_rbf</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Large dataset:
+• Training time:	   77.170s
+• Training set accuracy:   92.659%
+• Validation set accuracy: 91.238%
+
+Small dataset:
+• Training time:	   6.476s
+• Training set accuracy:   99.633%
+• Validation set accuracy: 94.714%
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">35</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">45</span><span class="p">,</span><span class="mi">50</span><span class="p">]</span>
+<span class="n">svm_rbf</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">decision_function_shape</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+<span class="n">validation_curves</span><span class="p">(</span><span class="n">svm_rbf</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">,</span> <span class="s1">&#39;SVM with RBF Kernel&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/mnist_sklearn_22_0.png" src="../_images/mnist_sklearn_22_0.png" />
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="naive-bayes-classifiers">
+<h2>Naive Bayes Classifiers<a class="headerlink" href="#naive-bayes-classifiers" title="Permalink to this headline">¶</a></h2>
+<p>The Naive Bayes classifier is a generative model, meaning that it models the distribution of individual classes rather than learning a decision boundary. Naive Bayes is based on Bayes’ Theorem: <span class="math notranslate nohighlight">\(P(y|x) = \frac{P(y)P(x|y)}{P(x)}\)</span></p>
+<p>We can calculate <span class="math notranslate nohighlight">\(P(y|x)\)</span> if we make the naive assumption that the features <span class="math notranslate nohighlight">\(x_i\)</span> are independent of each other, which very rarely occurs but often works sufficiently in practice. Assuming independence, <span class="math notranslate nohighlight">\(P(y|x) = \frac{P(y)\Pi_{i=1}^nP(x_i|y)}{\Pi_{i=1}^nP(x_i)}\)</span>. The Naive Bayes classifier then predicts the class <span class="math notranslate nohighlight">\(y\)</span> with the highest <span class="math notranslate nohighlight">\(P(y|x)\)</span>.</p>
+<p>Because the MNIST data contains discrete data (integers), we will use the multinomial Naive Bayes classifier, where class and conditional probabilities are calculated from the training set.</p>
+<div class="section" id="gaussian-naive-bayes">
+<h3>Gaussian Naive Bayes<a class="headerlink" href="#gaussian-naive-bayes" title="Permalink to this headline">¶</a></h3>
+<p>The Gaussian Naive Bayes classifier models continuous-valued features. The MNIST data is technically discrete, but is only forced to be so due to limitations of image representation. In practice, values are essentially continuous.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nb_gaus</span> <span class="o">=</span> <span class="n">GaussianNB</span><span class="p">()</span>
+<span class="n">train</span><span class="p">(</span><span class="n">nb_gaus</span><span class="p">)</span>
+<span class="n">train_small</span><span class="p">(</span><span class="n">nb_gaus</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Large dataset:
+• Training time:	   1.220s
+• Training set accuracy:   53.953%
+• Validation set accuracy: 54.105%
+
+Small dataset:
+• Training time:	   0.137s
+• Training set accuracy:   62.776%
+• Validation set accuracy: 61.286%
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="multinomial-naive-bayes">
+<h3>Multinomial Naive Bayes<a class="headerlink" href="#multinomial-naive-bayes" title="Permalink to this headline">¶</a></h3>
+<p>The Multinomial Naive Bayes classifier models discrete-valued features.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nb_mult</span> <span class="o">=</span> <span class="n">MultinomialNB</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">train</span><span class="p">(</span><span class="n">nb_mult</span><span class="p">)</span>
+<span class="n">train_small</span><span class="p">(</span><span class="n">nb_mult</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Large dataset:
+• Training time:	   0.364s
+• Training set accuracy:   82.894%
+• Validation set accuracy: 82.186%
+
+Small dataset:
+• Training time:	   0.030s
+• Training set accuracy:   83.204%
+• Validation set accuracy: 82.571%
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="analysis-which-classifier-to-use">
+<h2>Analysis: Which Classifier to Use<a class="headerlink" href="#analysis-which-classifier-to-use" title="Permalink to this headline">¶</a></h2>
+<p>Classification accuracy is one of the most important factors in determining a good model. The least accurate model was the SVM with linear kernel. With a low accuracy of 70%, this result suggests that the data is not effectively linearly separable. Therefore, it would be more effective to use a model that can better deal with nonlinear classification. This result is confirmed with logistic regression and SVM with RBF kernel both attaining 91% accuracy, though SVM has the capability to perform better with more epochs and optimized hyperparameters. The Naive Bayes classifier performed at an intermediate level with an accuracy of 82%. It likely did not perform as well due to the naive assumption not being sufficiently effective, which makes sense because pixels in a digit are certainly dependent on their surrounding pixels.</p>
+<p>Computation time is also valuable. The Naive Bayes classifier was extremely quick to train even with large datasets since it only needs to go through the data once to calculate probabilities. In comparison, logistic regression is much slower, but still reasonably quick to train with a large dataset. SVM is the slowest by far, which becomes especially evident with larger datasets. This occurs because training computation increases quadratically with the number of samples for SVMs.</p>
+<p>Hyperparameters contribute to computation since they need to be optimized to attain a greater accuracy. Naive Bayes lacks hyperparameters, making it very easy to implement and run. Logistic regression only uses one hyperparameter <span class="math notranslate nohighlight">\(C\)</span>, which is fairly manageable. SVMs with a polynomial or RBF kernel need to optimize both <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(\gamma\)</span>, which takes much longer. In this report, I had to restrict <span class="math notranslate nohighlight">\(\gamma\)</span> to a default value to make it reasonably quick. For SVMs, there is also a choice between many different kernels.</p>
+<p>The issue of overfitting also presents a challenge. With large amounts of data, it becomes unlikely to overfit because there are so many examples that need to have cost minimized. Consequently, all models yielded minimal difference between the training set accuracy and validation set accuracy for the large dataset. However, overfitting became an issue at the smaller dataset for all models besides Naive Bayes.</p>
+<p>In general, it’s a good idea to try different models as they all have benefits for different types of problems. I would recommend always trying Naive Bayes first since it’s just so quick and simple. There’s a good chance the model (and the naive assumption) will perform surprisingly accurately with minimal overfitting, though typically not as well as other trained and tuned models. It may also be worth a shot to try a SVM with linear kernel to see if the data is linearly separable, which allows for simpler calculations and visualization. In the case that both don’t work, logistic regression and SVMs should be evauluated. Both models have a flexible decision boundary, which especially pertains to the different kernels a SVM can use. The trade-off is between computation and accuracy: SVMs are typically more accurate since they use large-margin classification, but they are much more memory intensive than logistic regression due to tuning and training.</p>
+</div>
+<div class="section" id="other-classifiers">
+<h2>Other Classifiers<a class="headerlink" href="#other-classifiers" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ensemble-methods">
+<h3>Ensemble Methods<a class="headerlink" href="#ensemble-methods" title="Permalink to this headline">¶</a></h3>
+<p>Ensemble methods combine multiple weaker models into a singal model more optimal for classification.</p>
+<div class="section" id="random-forest-classifier">
+<h4>Random Forest Classifier<a class="headerlink" href="#random-forest-classifier" title="Permalink to this headline">¶</a></h4>
+<p>Random forest is based on decision trees, a model that separates classes using decisions in a tree-like organization, where each decision splits a node into multiple paths. Each decision is based on a feature and is chosen in order of features that create the most separation.</p>
+<p>Random forest classifiers use multiple decision trees that are relatively uncorrelated, hence creating an ensemble. Each decision tree gives a prediction and the random forest picks the majority vote. Low correlation allows for trees to protect each other from invidual error. This is accomplished by providing each decision tree with a random subset of features rather than all features.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">()</span>
+<span class="n">train</span><span class="p">(</span><span class="n">rf</span><span class="p">)</span>
+<span class="n">train_small</span><span class="p">(</span><span class="n">rf</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Large dataset:
+• Training time:	   50.922s
+• Training set accuracy:   100.000%
+• Validation set accuracy: 96.681%
+
+Small dataset:
+• Training time:	   3.586s
+• Training set accuracy:   100.000%
+• Validation set accuracy: 93.762%
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="gradient-boosting-classifier">
+<h4>Gradient Boosting Classifier<a class="headerlink" href="#gradient-boosting-classifier" title="Permalink to this headline">¶</a></h4>
+<p>Gradient boosting classifier are similar to random forest classifiers in the sense that they use a majority vote from an ensemble of decision trees.</p>
+<p>It differs because decision trees are added one at a time, minimizing a cost function in the process.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gb</span> <span class="o">=</span> <span class="n">GradientBoostingClassifier</span><span class="p">(</span><span class="n">max_features</span><span class="o">=</span><span class="s1">&#39;sqrt&#39;</span><span class="p">)</span>
+<span class="n">train</span><span class="p">(</span><span class="n">gb</span><span class="p">)</span>
+<span class="n">train_small</span><span class="p">(</span><span class="n">gb</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Large dataset:
+• Training time:	   192.125s
+• Training set accuracy:   95.133%
+• Validation set accuracy: 93.595%
+
+Small dataset:
+• Training time:	   17.428s
+• Training set accuracy:   99.061%
+• Validation set accuracy: 92.048%
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="neural-networks">
+<h3>Neural Networks<a class="headerlink" href="#neural-networks" title="Permalink to this headline">¶</a></h3>
+<p>Neural networks are structures of nodes in layers, where weighted connections form between nodes in different layers. These weights and node activations in one layer define the activations of nodes in the next layer in a process called forward propagation.</p>
+<p>NNs behave similarly to logistic regression as ativations can use the logistic activation function, though other activation functions can be used as well. They also have the same cost function that can be minimized with an optimization method such as gradient descent or L-BFGS. Due to the NN structure, the gradient is computed through back propagation.</p>
+<div class="section" id="multi-layer-perceptron">
+<h4>Multi-layer Perceptron<a class="headerlink" href="#multi-layer-perceptron" title="Permalink to this headline">¶</a></h4>
+<p>A MLP is a neural networks that is organized as an input layer, hidden layers, and an output layer, with each node being connected to all nodes in the next layer. It does not have any other complex structure that other neural networks may have.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Loss Curve for MLP&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Epochs&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Loss&#39;</span><span class="p">)</span>
+<span class="n">mlp</span> <span class="o">=</span> <span class="n">MLPClassifier</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s1">&#39;adam&#39;</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;logistic&#39;</span><span class="p">)</span>
+
+<span class="n">train</span><span class="p">(</span><span class="n">mlp</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlp</span><span class="o">.</span><span class="n">loss_curve_</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Large Training Set&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;royalblue&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">train_small</span><span class="p">(</span><span class="n">mlp</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlp</span><span class="o">.</span><span class="n">loss_curve_</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Small Training Set&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orangered&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper center&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Large dataset:
+• Training time:	   172.790s
+• Training set accuracy:   100.000%
+• Validation set accuracy: 97.476%
+
+Small dataset:
+• Training time:	   30.225s
+• Training set accuracy:   100.000%
+• Validation set accuracy: 93.286%
+</pre></div>
+</div>
+<img alt="../_images/mnist_sklearn_37_1.png" src="../_images/mnist_sklearn_37_1.png" />
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="comparison-with-logistic-regression-svms-and-naive-bayes">
+<h3>Comparison With Logistic Regression, SVMs, and Naive Bayes<a class="headerlink" href="#comparison-with-logistic-regression-svms-and-naive-bayes" title="Permalink to this headline">¶</a></h3>
+<p>All three models had much higher classification accuracies than previous models, though this lead to slower training for the gradient boosting classifier and MLP. The random forest classifier stood out as a model with  high accuracy while still maintaining a reasonable training speed that was quicker than SVMs.</p>
+<p>The models also all have hyperparameters that require time to tune. However, they already work very well with no tuning, which suggest that a tuned model would be even more accurate. There was some overfitting with both dataset sizes, though this may have been caused by improper tuning.</p>
+<p>Ultimately, the decision once again comes down to accuracy vs computation, though different classifiers may work better with other types of problems so it is beneficial to try multiple models.</p>
+</div>
+</div>
+</div>
+
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+    <a class='left-prev' id="prev-link" href="../intro.html" title="previous page">About Me</a>
+    <a class='right-next' id="next-link" href="mnist_pytorch.html" title="next page">Machine Learning in PyTorch</a>
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By Jason Liu<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    <script src="../_static/js/index.js"></script>
+    
+  </body>
+</html>

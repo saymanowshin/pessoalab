@@ -206,6 +206,7 @@
 <div class="cell_input docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span><span class="p">,</span> <span class="n">optim</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">random_split</span>
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
 <span class="kn">import</span> <span class="nn">torchvision</span>
 <span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">transforms</span>
@@ -217,20 +218,27 @@
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sn</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">livelossplot</span> <span class="kn">import</span> <span class="n">PlotLosses</span>
 </pre></div>
 </div>
 </div>
 </div>
-<p>The full MNIST dataset is split into training and validation sets. A batch size is also defined for stochastic gradient descent:</p>
+<p>The full MNIST dataset is split into training (42000), validation (18000), and test (10000) sets. A batch size of 64 is also defined for stochastic gradient descent:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span><span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mf">0.5</span><span class="p">,),(</span><span class="mf">0.5</span><span class="p">,))])</span> <span class="c1">#[-1,1]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span><span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mf">0.5</span><span class="p">,),(</span><span class="mf">0.5</span><span class="p">,))])</span> <span class="c1">#[-1,1]</span>
 <span class="n">trainset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">MNIST</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">&#39;./data&#39;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">)</span>
+<span class="n">trainset</span><span class="p">,</span> <span class="n">valset</span> <span class="o">=</span> <span class="n">random_split</span><span class="p">(</span><span class="n">trainset</span><span class="p">,</span> <span class="p">[</span><span class="mi">42000</span><span class="p">,</span><span class="mi">18000</span><span class="p">])</span>
 <span class="n">testset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">MNIST</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">&#39;./data&#39;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">)</span>
 <span class="n">trainloader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">trainset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">valloader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">valset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">testloader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">testset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">dataloaders</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;train&#39;</span><span class="p">:</span><span class="n">trainloader</span><span class="p">,</span> <span class="s1">&#39;validation&#39;</span><span class="p">:</span> <span class="n">testloader</span><span class="p">}</span>
+<span class="n">dataloaders</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;train&#39;</span><span class="p">:</span><span class="n">trainloader</span><span class="p">,</span> <span class="s1">&#39;validation&#39;</span><span class="p">:</span><span class="n">valloader</span><span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -302,24 +310,26 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_html">== Status ==<br>Memory usage on this node: 9.2/23.9 GiB<br>Using FIFO scheduling algorithm.<br>Resources requested: 0/8 CPUs, 0/0 GPUs, 0.0/9.33 GiB heap, 0.0/3.22 GiB objects<br>Result logdir: C:\Users\jl208\ray_results\trainable_logreg<br>Number of trials: 3 (3 TERMINATED)<br><table>
+<div class="output text_html">== Status ==<br>Memory usage on this node: 8.6/23.9 GiB<br>Using FIFO scheduling algorithm.<br>Resources requested: 0/8 CPUs, 0/0 GPUs, 0.0/9.77 GiB heap, 0.0/3.37 GiB objects<br>Result logdir: C:\Users\jl208\ray_results\trainable_logreg<br>Number of trials: 3 (3 TERMINATED)<br><table>
 <thead>
 <tr><th>Trial name                  </th><th>status    </th><th>loc  </th><th style="text-align: right;">  lr</th><th style="text-align: right;">    loss</th><th style="text-align: right;">  iter</th><th style="text-align: right;">  total time (s)</th></tr>
 </thead>
 <tbody>
-<tr><td>trainable_logreg_bab8b_00000</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.01</td><td style="text-align: right;">0.297413</td><td style="text-align: right;">    10</td><td style="text-align: right;">         189.107</td></tr>
-<tr><td>trainable_logreg_bab8b_00001</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.03</td><td style="text-align: right;">0.279967</td><td style="text-align: right;">    10</td><td style="text-align: right;">         188.665</td></tr>
-<tr><td>trainable_logreg_bab8b_00002</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.1 </td><td style="text-align: right;">0.323392</td><td style="text-align: right;">    10</td><td style="text-align: right;">         188.539</td></tr>
+<tr><td>trainable_logreg_4bda0_00000</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.01</td><td style="text-align: right;">0.305648</td><td style="text-align: right;">    10</td><td style="text-align: right;">         172.208</td></tr>
+<tr><td>trainable_logreg_4bda0_00001</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.03</td><td style="text-align: right;">0.282862</td><td style="text-align: right;">    10</td><td style="text-align: right;">         170.787</td></tr>
+<tr><td>trainable_logreg_4bda0_00002</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.1 </td><td style="text-align: right;">0.318506</td><td style="text-align: right;">    10</td><td style="text-align: right;">         172.697</td></tr>
 </tbody>
-</table><br><br></div><div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;ray.tune.analysis.experiment_analysis.ExperimentAnalysis at 0x1c836e8d888&gt;
+</table><br><br></div><div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;ray.tune.analysis.experiment_analysis.ExperimentAnalysis at 0x19951a446c8&gt;
 </pre></div>
 </div>
 </div>
 </div>
-<p>Train the model using stochastic gradient descent. To evaluate the classifier’s capabilities, we can we plot the accuracy and loss for training and validation sets as functions of the number of training epochs. Generally, accuracy should continually increase and loss should continually decrease, though with SGD this may not always be true:</p>
+<p>Train the model using stochastic gradient descent. To evaluate the classifier’s capabilities, we can we plot the accuracy and loss for training and validation sets as functions of the number of training epochs. After training, we can evaluate the model with the test set:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">reshape</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">reshape</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+    <span class="n">best_val_loss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
 
     <span class="n">liveloss</span> <span class="o">=</span> <span class="n">PlotLosses</span><span class="p">()</span>
@@ -360,12 +370,38 @@
             <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;validation&#39;</span><span class="p">:</span>
                 <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;val_&#39;</span>
+                <span class="k">if</span> <span class="n">epoch_loss</span> <span class="o">&lt;</span> <span class="n">best_val_loss</span><span class="p">:</span>
+                    <span class="n">best_val_loss</span> <span class="o">=</span> <span class="n">epoch_loss</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 
             <span class="n">logs</span><span class="p">[</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;log loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">epoch_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="n">logs</span><span class="p">[</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;accuracy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">epoch_acc</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
         
         <span class="n">liveloss</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">logs</span><span class="p">)</span>
         <span class="n">liveloss</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+    
+    <span class="c1"># evaluating best model on test set</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">test_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">test_corrects</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">testloader</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">reshape</span><span class="p">:</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">test_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">*</span> <span class="n">inputs</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">test_corrects</span> <span class="o">+=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="n">labels</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">test_loss</span> <span class="o">=</span> <span class="n">test_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">testloader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="n">test_acc</span> <span class="o">=</span> <span class="n">test_corrects</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">testloader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Training time: </span><span class="si">%.3f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">time_start</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Test loss: </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">test_loss</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Test accuracy: </span><span class="si">%.3f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">test_acc</span><span class="o">*</span><span class="mi">100</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -376,18 +412,21 @@
 <span class="n">criterion</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
 <span class="n">optimizer</span><span class="o">=</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.03</span><span class="p">)</span>
 <span class="n">num_epochs</span><span class="o">=</span><span class="mi">20</span>
-<span class="n">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;mnist_pytorch_logreg.pt&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <img alt="../_images/mnist_pytorch_14_0.png" src="../_images/mnist_pytorch_14_0.png" />
 <div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy
-	training         	 (min:    0.867, max:    0.925, cur:    0.925)
-	validation       	 (min:    0.901, max:    0.923, cur:    0.921)
+	training         	 (min:    0.855, max:    0.925, cur:    0.925)
+	validation       	 (min:    0.873, max:    0.915, cur:    0.911)
 log loss
-	training         	 (min:    0.267, max:    0.467, cur:    0.267)
-	validation       	 (min:    0.273, max:    0.333, cur:    0.273)
+	training         	 (min:    0.266, max:    0.511, cur:    0.266)
+	validation       	 (min:    0.301, max:    0.406, cur:    0.308)
+Training time: 467.424s
+Test loss: 0.284
+Test accuracy: 92.160%
 </pre></div>
 </div>
 </div>
@@ -400,7 +439,7 @@ log loss
 
     <span class="n">cm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataloaders</span><span class="p">[</span><span class="s1">&#39;validation&#39;</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">testloader</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">reshape</span><span class="p">:</span>
                 <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
@@ -460,6 +499,7 @@ log loss
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">trainable_mlp</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
     
     <span class="n">model</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">()</span>
@@ -482,22 +522,27 @@ log loss
             <span class="n">running_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">*</span> <span class="n">inputs</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="n">tune</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">mean_loss</span><span class="o">=</span><span class="n">running_loss</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">trainloader</span><span class="o">.</span><span class="n">dataset</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tuning time: </span><span class="si">%.3f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">time_start</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
 
 <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">trainable_mlp</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="n">tune</span><span class="o">.</span><span class="n">grid_search</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])},</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_html">== Status ==<br>Memory usage on this node: 9.1/23.9 GiB<br>Using FIFO scheduling algorithm.<br>Resources requested: 0/8 CPUs, 0/0 GPUs, 0.0/9.33 GiB heap, 0.0/3.22 GiB objects<br>Result logdir: C:\Users\jl208\ray_results\trainable_mlp<br>Number of trials: 3 (3 TERMINATED)<br><table>
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>[2m[36m(pid=8108)[0m Tuning time: 167.976s
+</pre></div>
+</div>
+<div class="output text_html">== Status ==<br>Memory usage on this node: 8.6/23.9 GiB<br>Using FIFO scheduling algorithm.<br>Resources requested: 0/8 CPUs, 0/0 GPUs, 0.0/9.77 GiB heap, 0.0/3.37 GiB objects<br>Result logdir: C:\Users\jl208\ray_results\trainable_mlp<br>Number of trials: 3 (3 TERMINATED)<br><table>
 <thead>
 <tr><th>Trial name               </th><th>status    </th><th>loc  </th><th style="text-align: right;">  lr</th><th style="text-align: right;">     loss</th><th style="text-align: right;">  iter</th><th style="text-align: right;">  total time (s)</th></tr>
 </thead>
 <tbody>
-<tr><td>trainable_mlp_4e5b7_00000</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.01</td><td style="text-align: right;">0.174997 </td><td style="text-align: right;">    10</td><td style="text-align: right;">         190.186</td></tr>
-<tr><td>trainable_mlp_4e5b7_00001</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.03</td><td style="text-align: right;">0.0794319</td><td style="text-align: right;">    10</td><td style="text-align: right;">         188.54 </td></tr>
-<tr><td>trainable_mlp_4e5b7_00002</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.1 </td><td style="text-align: right;">0.0463838</td><td style="text-align: right;">    10</td><td style="text-align: right;">         189.077</td></tr>
+<tr><td>trainable_mlp_d8b07_00000</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.01</td><td style="text-align: right;">0.226144 </td><td style="text-align: right;">    10</td><td style="text-align: right;">         167.678</td></tr>
+<tr><td>trainable_mlp_d8b07_00001</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.03</td><td style="text-align: right;">0.101972 </td><td style="text-align: right;">    10</td><td style="text-align: right;">         166.59 </td></tr>
+<tr><td>trainable_mlp_d8b07_00002</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.1 </td><td style="text-align: right;">0.0530744</td><td style="text-align: right;">    10</td><td style="text-align: right;">         167.97 </td></tr>
 </tbody>
-</table><br><br></div><div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;ray.tune.analysis.experiment_analysis.ExperimentAnalysis at 0x1c83e1077c8&gt;
+</table><br><br></div><div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;ray.tune.analysis.experiment_analysis.ExperimentAnalysis at 0x19a90a50948&gt;
 </pre></div>
 </div>
 </div>
@@ -508,18 +553,21 @@ log loss
 <span class="n">criterion</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
 <span class="n">optimizer</span><span class="o">=</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 <span class="n">num_epochs</span><span class="o">=</span><span class="mi">20</span>
-<span class="n">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;mnist_pytorch_mlp.pt&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <img alt="../_images/mnist_pytorch_22_0.png" src="../_images/mnist_pytorch_22_0.png" />
 <div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy
-	training         	 (min:    0.854, max:    0.995, cur:    0.995)
-	validation       	 (min:    0.896, max:    0.977, cur:    0.977)
+	training         	 (min:    0.822, max:    0.995, cur:    0.995)
+	validation       	 (min:    0.802, max:    0.976, cur:    0.976)
 log loss
-	training         	 (min:    0.016, max:    0.455, cur:    0.016)
-	validation       	 (min:    0.079, max:    0.741, cur:    0.084)
+	training         	 (min:    0.017, max:    0.555, cur:    0.017)
+	validation       	 (min:    0.093, max:    0.714, cur:    0.098)
+Training time: 460.631s
+Test loss: 0.081
+Test accuracy: 97.660%
 </pre></div>
 </div>
 </div>
@@ -574,6 +622,7 @@ log loss
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">trainable_cnn</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">CNN</span><span class="p">()</span>
@@ -596,21 +645,23 @@ log loss
 
         <span class="n">tune</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">mean_loss</span><span class="o">=</span><span class="n">running_loss</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">trainloader</span><span class="o">.</span><span class="n">dataset</span><span class="p">))</span>
 
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tuning time: </span><span class="si">%.3f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">time_start</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
 <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">trainable_cnn</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="n">tune</span><span class="o">.</span><span class="n">grid_search</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])},</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_html">== Status ==<br>Memory usage on this node: 9.5/23.9 GiB<br>Using FIFO scheduling algorithm.<br>Resources requested: 0/8 CPUs, 0/0 GPUs, 0.0/9.33 GiB heap, 0.0/3.22 GiB objects<br>Result logdir: C:\Users\jl208\ray_results\trainable_cnn<br>Number of trials: 3 (3 TERMINATED)<br><table>
+<div class="output text_html">== Status ==<br>Memory usage on this node: 8.8/23.9 GiB<br>Using FIFO scheduling algorithm.<br>Resources requested: 0/8 CPUs, 0/0 GPUs, 0.0/9.77 GiB heap, 0.0/3.37 GiB objects<br>Result logdir: C:\Users\jl208\ray_results\trainable_cnn<br>Number of trials: 3 (3 TERMINATED)<br><table>
 <thead>
 <tr><th>Trial name               </th><th>status    </th><th>loc  </th><th style="text-align: right;">  lr</th><th style="text-align: right;">     loss</th><th style="text-align: right;">  iter</th><th style="text-align: right;">  total time (s)</th></tr>
 </thead>
 <tbody>
-<tr><td>trainable_cnn_df3af_00000</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.01</td><td style="text-align: right;">0.114151 </td><td style="text-align: right;">     5</td><td style="text-align: right;">         249.979</td></tr>
-<tr><td>trainable_cnn_df3af_00001</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.03</td><td style="text-align: right;">0.0636285</td><td style="text-align: right;">     5</td><td style="text-align: right;">         251.377</td></tr>
-<tr><td>trainable_cnn_df3af_00002</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.1 </td><td style="text-align: right;">0.0353578</td><td style="text-align: right;">     5</td><td style="text-align: right;">         254.954</td></tr>
+<tr><td>trainable_cnn_5da4c_00000</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.01</td><td style="text-align: right;">0.147092 </td><td style="text-align: right;">     5</td><td style="text-align: right;">         194.109</td></tr>
+<tr><td>trainable_cnn_5da4c_00001</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.03</td><td style="text-align: right;">0.0657198</td><td style="text-align: right;">     5</td><td style="text-align: right;">         198.405</td></tr>
+<tr><td>trainable_cnn_5da4c_00002</td><td>TERMINATED</td><td>     </td><td style="text-align: right;">0.1 </td><td style="text-align: right;">0.0405428</td><td style="text-align: right;">     5</td><td style="text-align: right;">         196.356</td></tr>
 </tbody>
-</table><br><br></div><div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;ray.tune.analysis.experiment_analysis.ExperimentAnalysis at 0x1c83d05ffc8&gt;
+</table><br><br></div><div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;ray.tune.analysis.experiment_analysis.ExperimentAnalysis at 0x199521ca808&gt;
 </pre></div>
 </div>
 </div>
@@ -621,18 +672,21 @@ log loss
 <span class="n">criterion</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
 <span class="n">optimizer</span><span class="o">=</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 <span class="n">num_epochs</span><span class="o">=</span><span class="mi">10</span>
-<span class="n">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;mnist_pytorch_cnn.pt&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <img alt="../_images/mnist_pytorch_28_0.png" src="../_images/mnist_pytorch_28_0.png" />
 <div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy
-	training         	 (min:    0.882, max:    0.994, cur:    0.994)
-	validation       	 (min:    0.976, max:    0.990, cur:    0.990)
+	training         	 (min:    0.837, max:    0.994, cur:    0.994)
+	validation       	 (min:    0.863, max:    0.988, cur:    0.987)
 log loss
-	training         	 (min:    0.017, max:    0.361, cur:    0.017)
-	validation       	 (min:    0.035, max:    0.074, cur:    0.036)
+	training         	 (min:    0.018, max:    0.502, cur:    0.018)
+	validation       	 (min:    0.045, max:    0.403, cur:    0.049)
+Training time: 356.850s
+Test loss: 0.031
+Test accuracy: 99.020%
 </pre></div>
 </div>
 </div>

@@ -1,8 +1,9 @@
 - file: intro
 
-- header: Machine Learning with MNIST
+- header: MNIST Digit Classification
 - file: mnist/mnist_sklearn
 - file: mnist/mnist_pytorch
 
-- header: Large Movie Review Dataset
-- file: movie/movie
+- header: IMDb Sentiment Analysis
+- file: imdb/imdb_rnn
+- file: imdb/imdb_lstm

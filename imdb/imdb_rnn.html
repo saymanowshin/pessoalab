@@ -94,11 +94,6 @@
   </a>
  </li>
  <li class="toctree-l1">
-  <a class="reference internal" href="#nested-cross-validation">
-   Nested Cross Validation
-  </a>
- </li>
- <li class="toctree-l1">
   <a class="reference internal" href="imdb_lstm.html">
    IMDb with LSTMs
   </a>
@@ -195,6 +190,11 @@
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#recurrent-neural-network">
    Recurrent Neural Network
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#nested-cross-validation">
+   Nested Cross Validation
   </a>
  </li>
 </ul>
@@ -563,9 +563,8 @@ Test accuracy: 72.12%
 </div>
 <p>72% accuracy is much better, but there’s still room to improve. Better models such as LSTMs can be used to achieve higher accuracy, which we will explore in the next section.</p>
 </div>
-</div>
 <div class="section" id="nested-cross-validation">
-<h1>Nested Cross Validation<a class="headerlink" href="#nested-cross-validation" title="Permalink to this headline">¶</a></h1>
+<h2>Nested Cross Validation<a class="headerlink" href="#nested-cross-validation" title="Permalink to this headline">¶</a></h2>
 <p>Using a test/val/train split is already quite effective. However, it only creates one split that can possibly create unbalanced datasets due to a random split. Consequently, a single test accuracy may not be fully representative of the model’s true accuracy.</p>
 <p>Nested cross validation is a solution to this problem. Instead of splitting the dataset once, k-fold CV splits the dataset into k equal parts known as folds. In the outer CV, one of these folds are used as a test set, while the other k-1 folds are used as a trainval set. Then in the inner CV, the trainval set is similarly split into k folds, one of which is used as a validation set while the rest are used as a training set. In the outer and inner CVs, all k folds are used as a training and validation set, respectively.</p>
 <p>In essence, the roles of each set remain the same, but apply to multiple folds instead of one. The validation set is used for hyperparameter optimization. In this case, optimization is done using a grid search, which finds the lowest mean loss across all k inner folds. Similarly, the test set is used to find the mean test loss and accuracy across all k outer folds.</p>
@@ -804,6 +803,7 @@ Training time: 2544.277s
 </div>
 <p>Here we see that the mean test accuracy is much lower than without using nested CV. While the first outer fold performed fairly well, the second and third folds did not. Nested CV was able to give a better, less biased evaluation of our model than with a train/val/test split, though at the expense of a much longer computation time. 3 folds is also less than ideal, as 5 or 10 folds are generally preferred. The number of folds and epochs were only chosen to achieve a realistic computation time, as this project is primarily a proof of concept.</p>
 <p>Now that we know the RNN model needs to be improved, we’ll explore using an LSTM model in the next section.</p>
+</div>
 </div>
 
 

@@ -1,0 +1,841 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>IMDb with Vanilla RNNs &#8212; Jason Liu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/sphinx-book-theme.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/mystnb.js"></script>
+    <script src="../_static/sphinx-book-theme.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IMDb with LSTMs" href="imdb_lstm.html" />
+    <link rel="prev" title="MNIST with PyTorch" href="../mnist/mnist_pytorch.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="../index.html">
+  
+  <img src="../_static/logo.png" class="logo" alt="logo">
+  
+  
+  <h1 class="site-logo" id="site-title">Jason Liu</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <p class="caption">
+ <span class="caption-text">
+  MNIST Digit Classification
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../mnist/mnist_sklearn.html">
+   MNIST with Scikit-Learn
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../mnist/mnist_pytorch.html">
+   MNIST with PyTorch
+  </a>
+ </li>
+</ul>
+<p class="caption">
+ <span class="caption-text">
+  IMDb Sentiment Analysis
+ </span>
+</p>
+<ul class="current nav sidenav_l1">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   IMDb with Vanilla RNNs
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="#nested-cross-validation">
+   Nested Cross Validation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="imdb_lstm.html">
+   IMDb with LSTMs
+  </a>
+ </li>
+</ul>
+
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../_sources/imdb/imdb_rnn.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
+    <div class="dropdown-buttons sourcebuttons">
+        <a class="repository-button"
+            href="https://github.com/jasoneliu/pessoalab"><button type="button" class="btn btn-secondary topbarbtn"
+                data-toggle="tooltip" data-placement="left" title="Source repository"><i
+                    class="fab fa-github"></i>repository</button></a>
+        <a class="issues-button"
+            href="https://github.com/jasoneliu/pessoalab/issues/new?title=Issue%20on%20page%20%2Fimdb/imdb_rnn.html&body=Your%20issue%20content%20here."><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Open an issue"><i class="fas fa-lightbulb"></i>open issue</button></a>
+        <a class="edit-button" href="https://github.com/jasoneliu/pessoalab/edit/master/imdb/imdb_rnn.ipynb"><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Edit this page"><i class="fas fa-pencil-alt"></i>suggest edit</button></a>
+    </div>
+</div>
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+    </div>
+
+    <!-- Table of contents -->
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> On this page
+        </div>
+        <nav id="bd-toc-nav">
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#imdb-movie-review-dataset-and-preprocessing">
+   IMDb Movie Review Dataset and Preprocessing
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#recurrent-neural-network">
+   Recurrent Neural Network
+  </a>
+ </li>
+</ul>
+
+        </nav>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="imdb-with-vanilla-rnns">
+<h1>IMDb with Vanilla RNNs<a class="headerlink" href="#imdb-with-vanilla-rnns" title="Permalink to this headline">¶</a></h1>
+<p><strong>7/14/2020</strong></p>
+<div class="section" id="imdb-movie-review-dataset-and-preprocessing">
+<h2>IMDb Movie Review Dataset and Preprocessing<a class="headerlink" href="#imdb-movie-review-dataset-and-preprocessing" title="Permalink to this headline">¶</a></h2>
+<p>The IMDb Movie Review Dataset contains 50,000 reviews, split 50/50 into positive and negative reviews. The goal is to create a model that can accurately predict the sentiment (positive or negative) of a given review.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span><span class="p">,</span> <span class="n">optim</span>
+<span class="kn">from</span> <span class="nn">torchtext</span> <span class="kn">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">datasets</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">import</span> <span class="nn">spacy</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">set_matplotlib_formats</span>
+<span class="n">set_matplotlib_formats</span><span class="p">(</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">livelossplot</span> <span class="kn">import</span> <span class="n">PlotLosses</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In order for a review to become the input of a neural network, we need to preprocess the text. The first step is to tokenize the text, meaning to break up the text into individual units that are easily understood, such as words. The spacy tokenizer does this fairly well by splitting text by spaces and separating punctuation. The reviews also contain &lt;br /&gt; tags which need to be removed, which necessitates a custom tokenizer based on spacy.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">custom_tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">nlp</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;en_core_web_sm&#39;</span><span class="p">,</span> <span class="n">disable</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tagger&#39;</span><span class="p">,</span> <span class="s1">&#39;parser&#39;</span><span class="p">,</span> <span class="s1">&#39;ner&#39;</span><span class="p">,</span> <span class="s1">&#39;textcat&#39;</span><span class="p">,</span> <span class="s1">&#39;...&#39;</span><span class="p">])</span>
+
+    <span class="n">prefixes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nlp</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">prefixes</span><span class="p">)</span>
+    <span class="n">prefixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;/&gt;&#39;</span><span class="p">)</span>
+    <span class="n">prefix_regex</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">compile_prefix_regex</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">prefixes</span><span class="p">))</span>
+    <span class="n">nlp</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">prefix_search</span> <span class="o">=</span> <span class="n">prefix_regex</span><span class="o">.</span><span class="n">search</span>
+
+    <span class="n">suffixes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nlp</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">suffixes</span><span class="p">)</span>
+    <span class="n">suffixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;br&#39;</span><span class="p">)</span>
+    <span class="n">suffix_regex</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">compile_suffix_regex</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">suffixes</span><span class="p">))</span>
+    <span class="n">nlp</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">suffix_search</span> <span class="o">=</span> <span class="n">suffix_regex</span><span class="o">.</span><span class="n">search</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">token</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">nlp</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Using the custom tokenizer, we can load and process the entire IMDb dataset (text and labels) using torchtext fields. To make it easier to access the dataset without having to spend time tokenizing every time, we can save the processed data into a json file.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># set seed for reproducibility</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># split and tokenize full dataset</span>
+<span class="n">TEXT</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">tokenize</span><span class="o">=</span><span class="n">custom_tokenizer</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stop_words</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&lt;br&#39;</span><span class="p">,</span><span class="s1">&#39;/&gt;&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span><span class="s1">&#39;br&#39;</span><span class="p">])</span>
+<span class="n">LABEL</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">LabelField</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+<span class="n">imdb</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">IMDB</span><span class="p">(</span><span class="s1">&#39;.data/imdb/aclImdb/*&#39;</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">,</span> <span class="n">LABEL</span><span class="p">)</span>
+
+<span class="c1"># save dataset</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;imdb.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">review</span> <span class="ow">in</span> <span class="n">imdb</span><span class="p">:</span>
+    <span class="n">review_text</span> <span class="o">=</span> <span class="n">review</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&#39;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{\&quot;</span><span class="s1">label</span><span class="se">\&quot;</span><span class="s1">: </span><span class="si">{</span><span class="n">LABEL</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">stoi</span><span class="p">[</span><span class="n">review</span><span class="o">.</span><span class="n">label</span><span class="p">]</span><span class="si">}</span><span class="s1">, </span><span class="se">\&quot;</span><span class="s1">text</span><span class="se">\&quot;</span><span class="s1">: </span><span class="si">{</span><span class="n">review_text</span><span class="si">}</span><span class="se">}}\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we can easily load in the dataset. We also want to split the dataset into train/validation/test sets with sizes 60%/20%/20%.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LABEL</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">LabelField</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+<span class="n">TEXT</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">include_lengths</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">imdb</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">TabularDataset</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;imdb.json&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;JSON&#39;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">({</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="n">LABEL</span><span class="p">),</span> <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span><span class="n">TEXT</span><span class="p">)}))</span>
+<span class="n">train_set</span><span class="p">,</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">imdb</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">split_ratio</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">val_set</span><span class="p">,</span> <span class="n">test_set</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">split_ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Training set size:   </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">train_set</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Validation set size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">val_set</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Test set size:       </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">test_set</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Training set size:   30000
+Validation set size: 10000
+Test set size:       10000
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s take a look at one example review. For this dataset, a label of 0 is negative and 1 is positive.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Tokenized text: </span><span class="si">{</span><span class="n">imdb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Label: </span><span class="si">{</span><span class="n">imdb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>
+Tokenized text: [&#39;based&#39;, &#39;on&#39;, &#39;an&#39;, &#39;actual&#39;, &#39;story&#39;, &#39;,&#39;, &#39;john&#39;, &#39;boorman&#39;, &#39;shows&#39;, &#39;the&#39;, &#39;struggle&#39;, &#39;of&#39;, &#39;an&#39;, &#39;american&#39;, &#39;doctor&#39;, &#39;,&#39;, &#39;whose&#39;, &#39;husband&#39;, &#39;and&#39;, &#39;son&#39;, &#39;were&#39;, &#39;murdered&#39;, &#39;and&#39;, &#39;she&#39;, &#39;was&#39;, &#39;continually&#39;, &#39;plagued&#39;, &#39;with&#39;, &#39;her&#39;, &#39;loss&#39;, &#39;.&#39;, &#39;a&#39;, &#39;holiday&#39;, &#39;to&#39;, &#39;burma&#39;, &#39;with&#39;, &#39;her&#39;, &#39;sister&#39;, &#39;seemed&#39;, &#39;like&#39;, &#39;a&#39;, &#39;good&#39;, &#39;idea&#39;, &#39;to&#39;, &#39;get&#39;, &#39;away&#39;, &#39;from&#39;, &#39;it&#39;, &#39;all&#39;, &#39;,&#39;, &#39;but&#39;, &#39;when&#39;, &#39;her&#39;, &#39;passport&#39;, &#39;was&#39;, &#39;stolen&#39;, &#39;in&#39;, &#39;rangoon&#39;, &#39;,&#39;, &#39;she&#39;, &#39;could&#39;, &#39;not&#39;, &#39;leave&#39;, &#39;the&#39;, &#39;country&#39;, &#39;with&#39;, &#39;her&#39;, &#39;sister&#39;, &#39;,&#39;, &#39;and&#39;, &#39;was&#39;, &#39;forced&#39;, &#39;to&#39;, &#39;stay&#39;, &#39;back&#39;, &#39;until&#39;, &#39;she&#39;, &#39;could&#39;, &#39;get&#39;, &#39;i.d.&#39;, &#39;papers&#39;, &#39;from&#39;, &#39;the&#39;, &#39;american&#39;, &#39;embassy&#39;, &#39;.&#39;, &#39;to&#39;, &#39;fill&#39;, &#39;in&#39;, &#39;a&#39;, &#39;day&#39;, &#39;before&#39;, &#39;she&#39;, &#39;could&#39;, &#39;fly&#39;, &#39;out&#39;, &#39;,&#39;, &#39;she&#39;, &#39;took&#39;, &#39;a&#39;, &#39;trip&#39;, &#39;into&#39;, &#39;the&#39;, &#39;countryside&#39;, &#39;with&#39;, &#39;a&#39;, &#39;tour&#39;, &#39;guide&#39;, &#39;.&#39;, &#39;&quot;&#39;, &#39;i&#39;, &#39;tried&#39;, &#39;finding&#39;, &#39;something&#39;, &#39;in&#39;, &#39;those&#39;, &#39;stone&#39;, &#39;statues&#39;, &#39;,&#39;, &#39;but&#39;, &#39;nothing&#39;, &#39;stirred&#39;, &#39;in&#39;, &#39;me&#39;, &#39;.&#39;, &#39;i&#39;, &#39;was&#39;, &#39;stone&#39;, &#39;myself&#39;, &#39;.&#39;, &#39;&quot;&#39;, &#39;suddenly&#39;, &#39;all&#39;, &#39;hell&#39;, &#39;broke&#39;, &#39;loose&#39;, &#39;and&#39;, &#39;she&#39;, &#39;was&#39;, &#39;caught&#39;, &#39;in&#39;, &#39;a&#39;, &#39;political&#39;, &#39;revolt&#39;, &#39;.&#39;, &#39;just&#39;, &#39;when&#39;, &#39;it&#39;, &#39;looked&#39;, &#39;like&#39;, &#39;she&#39;, &#39;had&#39;, &#39;escaped&#39;, &#39;and&#39;, &#39;safely&#39;, &#39;boarded&#39;, &#39;a&#39;, &#39;train&#39;, &#39;,&#39;, &#39;she&#39;, &#39;saw&#39;, &#39;her&#39;, &#39;tour&#39;, &#39;guide&#39;, &#39;get&#39;, &#39;beaten&#39;, &#39;and&#39;, &#39;shot&#39;, &#39;.&#39;, &#39;in&#39;, &#39;a&#39;, &#39;split&#39;, &#39;second&#39;, &#39;she&#39;, &#39;decided&#39;, &#39;to&#39;, &#39;jump&#39;, &#39;from&#39;, &#39;the&#39;, &#39;moving&#39;, &#39;train&#39;, &#39;and&#39;, &#39;try&#39;, &#39;to&#39;, &#39;rescue&#39;, &#39;him&#39;, &#39;,&#39;, &#39;with&#39;, &#39;no&#39;, &#39;thought&#39;, &#39;of&#39;, &#39;herself&#39;, &#39;.&#39;, &#39;continually&#39;, &#39;her&#39;, &#39;life&#39;, &#39;was&#39;, &#39;in&#39;, &#39;danger&#39;, &#39;.&#39;, &#39;here&#39;, &#39;is&#39;, &#39;a&#39;, &#39;woman&#39;, &#39;who&#39;, &#39;demonstrated&#39;, &#39;spontaneous&#39;, &#39;,&#39;, &#39;selfless&#39;, &#39;charity&#39;, &#39;,&#39;, &#39;risking&#39;, &#39;her&#39;, &#39;life&#39;, &#39;to&#39;, &#39;save&#39;, &#39;another&#39;, &#39;.&#39;, &#39;patricia&#39;, &#39;arquette&#39;, &#39;is&#39;, &#39;beautiful&#39;, &#39;,&#39;, &#39;and&#39;, &#39;not&#39;, &#39;just&#39;, &#39;to&#39;, &#39;look&#39;, &#39;at&#39;, &#39;;&#39;, &#39;she&#39;, &#39;has&#39;, &#39;a&#39;, &#39;beautiful&#39;, &#39;heart&#39;, &#39;.&#39;, &#39;this&#39;, &#39;is&#39;, &#39;an&#39;, &#39;unforgettable&#39;, &#39;story&#39;, &#39;.&#39;, &#39;&quot;&#39;, &#39;we&#39;, &#39;are&#39;, &#39;taught&#39;, &#39;that&#39;, &#39;suffering&#39;, &#39;is&#39;, &#39;the&#39;, &#39;one&#39;, &#39;promise&#39;, &#39;that&#39;, &#39;life&#39;, &#39;always&#39;, &#39;keeps&#39;, &#39;.&#39;, &#39;&quot;&#39;]
+
+Label: 1
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can build a vocabulary of tokens from the training set. The most common vocab tokens are show below. Each token in the vocab is assigned to a unique index, which allows for each token to be represented as a one-hot vector, which has the same length as the vocab. All elements are set to 0 except for the element at the token’s corresponding index, which is instead set to 1.</p>
+<p>By setting a maximum of 25,000 tokens, we can prevent the model from learning the sentiment of every single token. All other words are simply replaced with &lt;unk&gt;, which will be ignored by the model.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEXT</span><span class="o">.</span><span class="n">build_vocab</span><span class="p">(</span><span class="n">train_set</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="mi">25000</span><span class="p">,</span> <span class="n">vectors</span> <span class="o">=</span> <span class="s2">&quot;glove.6B.100d&quot;</span><span class="p">,</span> <span class="n">unk_init</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">.</span><span class="n">normal_</span><span class="p">)</span>
+<span class="n">LABEL</span><span class="o">.</span><span class="n">build_vocab</span><span class="p">(</span><span class="n">train_set</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">freqs</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;the&#39;, 397969), (&#39;.&#39;, 324479), (&#39;,&#39;, 324093), (&#39;and&#39;, 192895), (&#39;a&#39;, 191873), (&#39;of&#39;, 172229), (&#39;to&#39;, 160056), (&#39;is&#39;, 128961), (&#39;it&#39;, 113936), (&#39;in&#39;, 111605), (&#39;i&#39;, 104615), (&#39;this&#39;, 89961), (&#39;that&#39;, 86262), (&#39;&quot;&#39;, 77757), (&quot;&#39;s&quot;, 72818), (&#39;-&#39;, 61786), (&#39;was&#39;, 59883), (&#39;as&#39;, 54536), (&#39;movie&#39;, 52881), (&#39;for&#39;, 52036)]
+</pre></div>
+</div>
+</div>
+</div>
+<p>We want to iterate through the data in batches for SGD. However, all sequences in a batch need to have the same length. This is accomplished by adding padding to the end of sequences, represented as &lt;pad&gt;. To minimize the amount of padding needed, we can use BucketIterators that sort the reviews by length and allow for batch iteration.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+<span class="n">train_itr</span><span class="p">,</span> <span class="n">val_itr</span><span class="p">,</span> <span class="n">test_itr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">BucketIterator</span><span class="o">.</span><span class="n">splits</span><span class="p">((</span><span class="n">train_set</span><span class="p">,</span> <span class="n">val_set</span><span class="p">,</span> <span class="n">test_set</span><span class="p">),</span> <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">sort_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">text</span><span class="p">),</span> <span class="n">sort_within_batch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="recurrent-neural-network">
+<h2>Recurrent Neural Network<a class="headerlink" href="#recurrent-neural-network" title="Permalink to this headline">¶</a></h2>
+<p>We’re going to use a simple, vanilla RNN for classification. RNNs have a hidden state that is determined by the previous hidden state, thus creating recurrence. This allows it to have a “memory”.</p>
+<p>For classifying reviews, each time step inputs a single token formatted as a one-hot vector. The embedding layer converts this input to a dense embedding vector that no longer contains only 0 and 1. The RNN layer uses the embedding vector and previous hidden state to return an output and the current hidden state. The RNN output is passed to a fully connected linear output layer that allows for binary classification. The RNN model follows the tokens in sequential order, simulating how a human reads.</p>
+<p>To improve accuracy, padded sequences are packed so that the RNN doesn’t learn from the padding tokens. The sequences are then repacked to continue passing data through the model.
+Dropout is also used in the embedding and hidden layers to randomly ignore/drop out nodes, which helps prevent overfitting.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">RNN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">embedding_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">,</span> <span class="n">dropout</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding_dim</span> <span class="o">=</span> <span class="n">embedding_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">embedding_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rnn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">RNN</span><span class="p">(</span><span class="n">embedding_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">text_lengths</span><span class="p">):</span>
+        <span class="n">embedded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">embedding</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+        
+        <span class="c1"># pack</span>
+        <span class="n">packed_embedded</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">pack_padded_sequence</span><span class="p">(</span><span class="n">embedded</span><span class="p">,</span> <span class="n">text_lengths</span><span class="p">)</span>
+        <span class="n">packed_output</span><span class="p">,</span> <span class="n">hidden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rnn</span><span class="p">(</span><span class="n">packed_embedded</span><span class="p">)</span>
+        
+        <span class="c1"># unpack</span>
+        <span class="n">output</span><span class="p">,</span> <span class="n">output_lengths</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">pad_packed_sequence</span><span class="p">(</span><span class="n">packed_output</span><span class="p">)</span>
+        
+        <span class="n">hidden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">hidden</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:,:])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="p">(</span><span class="n">hidden</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Training and evaluation is nearly the same as for MLPs. The only difference is that each batch now needs to return sequence length along with the sequences so that the model can correctly pad and pack sequences.</p>
+<p>We define methods for accuracy, training, and evaluation of single batches, then combine them into a method to train and validate a model over multiple epochs, returning loss and accuracy as it trains.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">accuracy</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="n">rounded_outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">outputs</span><span class="p">))</span>
+    <span class="n">correct</span> <span class="o">=</span> <span class="p">(</span><span class="n">rounded_outputs</span> <span class="o">==</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">correct</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">correct</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">acc</span>
+
+
+
+<span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span> 
+    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">criterion</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    
+    <span class="n">epoch_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">epoch_acc</span> <span class="o">=</span> <span class="mf">0.0</span>
+    
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">train_itr</span><span class="p">:</span>
+        
+        <span class="n">text</span><span class="p">,</span> <span class="n">text_lengths</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">text</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">text_lengths</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">accuracy</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        
+        <span class="n">epoch_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">epoch_acc</span> <span class="o">+=</span> <span class="n">acc</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        
+    <span class="k">return</span> <span class="n">epoch_loss</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">iterator</span><span class="p">),</span> <span class="n">epoch_acc</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">iterator</span><span class="p">)</span>
+
+
+
+<span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">criterion</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    
+    <span class="n">epoch_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">epoch_acc</span> <span class="o">=</span> <span class="mf">0.0</span>
+    
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+            
+            <span class="n">text</span><span class="p">,</span> <span class="n">text_lengths</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">text_lengths</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="n">accuracy</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            
+            <span class="n">epoch_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">epoch_acc</span> <span class="o">+=</span> <span class="n">acc</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">epoch_loss</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">iterator</span><span class="p">),</span> <span class="n">epoch_acc</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">iterator</span><span class="p">)</span>
+
+
+
+<span class="k">def</span> <span class="nf">train_val_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+    <span class="n">best_val_loss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+    
+    <span class="n">liveloss</span> <span class="o">=</span> <span class="n">PlotLosses</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+
+        <span class="n">logs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">train_loss</span><span class="p">,</span> <span class="n">train_acc</span> <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">train_itr</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+        <span class="n">val_loss</span><span class="p">,</span> <span class="n">val_acc</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">val_itr</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">val_loss</span> <span class="o">&lt;</span> <span class="n">best_val_loss</span><span class="p">:</span>
+            <span class="n">best_val_loss</span> <span class="o">=</span> <span class="n">val_loss</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="n">logs</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_loss</span>
+        <span class="n">logs</span><span class="p">[</span><span class="s1">&#39;acc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_acc</span>
+        <span class="n">logs</span><span class="p">[</span><span class="s1">&#39;val_loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val_loss</span>
+        <span class="n">logs</span><span class="p">[</span><span class="s1">&#39;val_acc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val_acc</span>
+        
+        <span class="n">liveloss</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">logs</span><span class="p">)</span>
+        <span class="n">liveloss</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Training time: </span><span class="si">%.3f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">time_start</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s define</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">RNN</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="p">),</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BCEWithLogitsLoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;imdb_rnn.pt&#39;</span>
+
+<span class="n">train_val_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/imdb_rnn_21_0.png" src="../_images/imdb_rnn_21_0.png" />
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy
+	training         	 (min:    0.510, max:    0.601, cur:    0.601)
+	validation       	 (min:    0.518, max:    0.620, cur:    0.603)
+Loss
+	training         	 (min:    0.665, max:    0.699, cur:    0.665)
+	validation       	 (min:    0.648, max:    0.713, cur:    0.663)
+Training time: 175.879s
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s see how the trained model performs on a test set it’s never seen before.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">test_loss</span><span class="p">,</span> <span class="n">test_acc</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">test_itr</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Test loss: </span><span class="si">{</span><span class="n">test_loss</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Test accuracy: </span><span class="si">{</span><span class="p">(</span><span class="n">test_acc</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Test loss: 0.648
+Test accuracy: 61.69%
+</pre></div>
+</div>
+</div>
+</div>
+<p>62% isn’t a great accuracy since 50% is chance performance. We can improve the model by using pretrained word embeddings that are used to initialize the weights to the embedding layer instead of using random initialization. This change increases the model’s rate of improvement and likelihood of finding a good local minimum or even global minimum for loss.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">RNN</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="p">),</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BCEWithLogitsLoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;imdb_rnn.pt&#39;</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">vectors</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">stoi</span><span class="p">[</span><span class="n">TEXT</span><span class="o">.</span><span class="n">unk_token</span><span class="p">]]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">embedding_dim</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">stoi</span><span class="p">[</span><span class="n">TEXT</span><span class="o">.</span><span class="n">pad_token</span><span class="p">]]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">embedding_dim</span><span class="p">)</span>
+
+<span class="n">train_val_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/imdb_rnn_25_0.png" src="../_images/imdb_rnn_25_0.png" />
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy
+	training         	 (min:    0.513, max:    0.625, cur:    0.592)
+	validation       	 (min:    0.557, max:    0.724, cur:    0.688)
+Loss
+	training         	 (min:    0.650, max:    0.695, cur:    0.663)
+	validation       	 (min:    0.571, max:    0.687, cur:    0.588)
+Training time: 174.030s
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">test_loss</span><span class="p">,</span> <span class="n">test_acc</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">test_itr</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Test loss: </span><span class="si">{</span><span class="n">test_loss</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Test accuracy: </span><span class="si">{</span><span class="p">(</span><span class="n">test_acc</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Test loss: 0.574
+Test accuracy: 72.12%
+</pre></div>
+</div>
+</div>
+</div>
+<p>72% accuracy is much better, but there’s still room to improve. Better models such as LSTMs can be used to achieve higher accuracy, which we will explore in the next section.</p>
+</div>
+</div>
+<div class="section" id="nested-cross-validation">
+<h1>Nested Cross Validation<a class="headerlink" href="#nested-cross-validation" title="Permalink to this headline">¶</a></h1>
+<p>Using a test/val/train split is already quite effective. However, it only creates one split that can possibly create unbalanced datasets due to a random split. Consequently, a single test accuracy may not be fully representative of the model’s true accuracy.</p>
+<p>Nested cross validation is a solution to this problem. Instead of splitting the dataset once, k-fold CV splits the dataset into k equal parts known as folds. In the outer CV, one of these folds are used as a test set, while the other k-1 folds are used as a trainval set. Then in the inner CV, the trainval set is similarly split into k folds, one of which is used as a validation set while the rest are used as a training set. In the outer and inner CVs, all k folds are used as a training and validation set, respectively.</p>
+<p>In essence, the roles of each set remain the same, but apply to multiple folds instead of one. The validation set is used for hyperparameter optimization. In this case, optimization is done using a grid search, which finds the lowest mean loss across all k inner folds. Similarly, the test set is used to find the mean test loss and accuracy across all k outer folds.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">grid_search</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_set</span><span class="p">,</span> <span class="n">train_itr</span><span class="p">,</span> <span class="n">val_set</span><span class="p">,</span> <span class="n">val_itr</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">lr_params</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="n">val_losses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lr_params</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">lr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lr_params</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;lr = </span><span class="si">{</span><span class="n">lr</span><span class="si">}</span><span class="s1"> ... &#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;                 lr = </span><span class="si">{</span><span class="n">lr</span><span class="si">}</span><span class="s1"> ... &#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+            <span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">train_itr</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+        <span class="n">val_loss</span><span class="p">,</span> <span class="n">val_acc</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">val_itr</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+
+        <span class="n">val_losses</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">val_loss</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">val_losses</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cross_validate</span><span class="p">(</span><span class="n">torch_dataset</span><span class="p">,</span> <span class="n">outer_kfold</span><span class="p">,</span> <span class="n">num_outer_epochs</span><span class="p">,</span> <span class="n">inner_kfold</span><span class="p">,</span> <span class="n">num_inner_epochs</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">lr_params</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">nested</span><span class="p">):</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+    <span class="n">final_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">outer_kfold</span><span class="o">.</span><span class="n">n_splits</span><span class="p">)</span>
+    <span class="n">final_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">outer_kfold</span><span class="o">.</span><span class="n">n_splits</span><span class="p">)</span>
+    
+    <span class="c1"># Outer CV (trainval/test split)</span>
+    <span class="n">current_outer_fold</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">trainval_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">outer_kfold</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">torch_dataset</span><span class="o">.</span><span class="n">examples</span><span class="p">)):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Outer Fold </span><span class="si">{</span><span class="n">current_outer_fold</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">outer_kfold</span><span class="o">.</span><span class="n">n_splits</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">)</span>
+
+        <span class="n">TEXT</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">include_lengths</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">LABEL</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">LabelField</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span><span class="n">TEXT</span><span class="p">),(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="n">LABEL</span><span class="p">)]</span>
+
+        <span class="n">torch_dataset_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">torch_dataset</span><span class="o">.</span><span class="n">examples</span><span class="p">)</span>
+        <span class="n">trainval_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">torch_dataset_arr</span><span class="p">[</span><span class="n">trainval_index</span><span class="p">],</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+        <span class="n">test_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">torch_dataset_arr</span><span class="p">[</span><span class="n">test_index</span><span class="p">],</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+        <span class="n">trainval_data_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">trainval_data</span><span class="o">.</span><span class="n">examples</span><span class="p">)</span>
+
+        
+        
+        <span class="c1"># Inner CV (train/val split)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">nested</span><span class="p">):</span>
+            <span class="n">current_inner_fold</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">total_val_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lr_params</span><span class="p">))</span>
+            
+            <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">val_index</span> <span class="ow">in</span> <span class="n">inner_kfold</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">trainval_data_arr</span><span class="p">):</span>
+                
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  Inner Fold </span><span class="si">{</span><span class="n">current_inner_fold</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">inner_kfold</span><span class="o">.</span><span class="n">n_splits</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">)</span>
+
+                <span class="n">inner_TEXT</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">include_lengths</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">inner_LABEL</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">LabelField</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span><span class="n">inner_TEXT</span><span class="p">),(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="n">inner_LABEL</span><span class="p">)]</span>
+                
+                <span class="n">train_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">trainval_data_arr</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+                <span class="n">val_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">trainval_data_arr</span><span class="p">[</span><span class="n">val_index</span><span class="p">],</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+                <span class="n">train_itr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">BucketIterator</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">sort_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">text</span><span class="p">),</span> <span class="n">sort_within_batch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">val_itr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">BucketIterator</span><span class="p">(</span><span class="n">val_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">sort_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">text</span><span class="p">),</span> <span class="n">sort_within_batch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+                <span class="n">inner_TEXT</span><span class="o">.</span><span class="n">build_vocab</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">25000</span><span class="p">,</span> <span class="n">vectors</span> <span class="o">=</span> <span class="s2">&quot;glove.6B.100d&quot;</span><span class="p">,</span> <span class="n">unk_init</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">.</span><span class="n">normal_</span><span class="p">)</span>
+                <span class="n">inner_LABEL</span><span class="o">.</span><span class="n">build_vocab</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span>
+                
+                <span class="n">inner_model</span> <span class="o">=</span> <span class="n">RNN</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inner_TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="p">),</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+                <span class="n">inner_model</span><span class="o">.</span><span class="n">embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">inner_TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">vectors</span><span class="p">)</span>
+                <span class="n">inner_model</span><span class="o">.</span><span class="n">embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">inner_TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">stoi</span><span class="p">[</span><span class="n">inner_TEXT</span><span class="o">.</span><span class="n">unk_token</span><span class="p">]]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">inner_model</span><span class="o">.</span><span class="n">embedding_dim</span><span class="p">)</span>
+                <span class="n">inner_model</span><span class="o">.</span><span class="n">embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">inner_TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">stoi</span><span class="p">[</span><span class="n">inner_TEXT</span><span class="o">.</span><span class="n">pad_token</span><span class="p">]]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">inner_model</span><span class="o">.</span><span class="n">embedding_dim</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Grid Search: &#39;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">fold_val_loss</span> <span class="o">=</span> <span class="n">grid_search</span><span class="p">(</span><span class="n">inner_model</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">train_itr</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">val_itr</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">num_inner_epochs</span><span class="p">,</span> <span class="n">lr_params</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+                <span class="n">total_val_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">total_val_loss</span><span class="p">,</span> <span class="n">fold_val_loss</span><span class="p">)</span>
+                
+                <span class="n">current_inner_fold</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">best_lr</span> <span class="o">=</span> <span class="n">lr_params</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">total_val_loss</span><span class="p">)]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  Best Learning Rate: lr = </span><span class="si">{</span><span class="n">best_lr</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Non-nested CV</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">criterion</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+    
+    
+    
+        <span class="n">trainval_itr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">BucketIterator</span><span class="p">(</span><span class="n">trainval_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">sort_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">text</span><span class="p">),</span> <span class="n">sort_within_batch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">test_itr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">BucketIterator</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">sort_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">text</span><span class="p">),</span> <span class="n">sort_within_batch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            
+        <span class="n">TEXT</span><span class="o">.</span><span class="n">build_vocab</span><span class="p">(</span><span class="n">trainval_data</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">25000</span><span class="p">,</span> <span class="n">vectors</span> <span class="o">=</span> <span class="s2">&quot;glove.6B.100d&quot;</span><span class="p">,</span> <span class="n">unk_init</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">.</span><span class="n">normal_</span><span class="p">)</span>
+        <span class="n">LABEL</span><span class="o">.</span><span class="n">build_vocab</span><span class="p">(</span><span class="n">trainval_data</span><span class="p">)</span>
+        
+        <span class="n">model</span> <span class="o">=</span> <span class="n">RNN</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="p">),</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">vectors</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">stoi</span><span class="p">[</span><span class="n">TEXT</span><span class="o">.</span><span class="n">unk_token</span><span class="p">]]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">embedding_dim</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">TEXT</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">stoi</span><span class="p">[</span><span class="n">TEXT</span><span class="o">.</span><span class="n">pad_token</span><span class="p">]]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">embedding_dim</span><span class="p">)</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">best_lr</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_outer_epochs</span><span class="p">):</span>
+            <span class="n">trainval_loss</span><span class="p">,</span> <span class="n">trainval_acc</span> <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">trainval_itr</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+            <span class="n">test_loss</span><span class="p">,</span> <span class="n">test_acc</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">test_itr</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">:</span><span class="s1">02</span><span class="si">}</span><span class="s1"> | Train Loss: </span><span class="si">{</span><span class="n">trainval_loss</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> | Train Acc: </span><span class="si">{</span><span class="n">trainval_acc</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">% | Test Loss: </span><span class="si">{</span><span class="n">test_loss</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> | Test Acc: </span><span class="si">{</span><span class="n">test_acc</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="n">final_loss</span><span class="p">[</span><span class="n">current_outer_fold</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_loss</span>
+        <span class="n">final_acc</span><span class="p">[</span><span class="n">current_outer_fold</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_acc</span>
+        <span class="n">current_outer_fold</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Test Loss: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">final_loss</span><span class="p">)</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Test Acc: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">final_acc</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Training time: </span><span class="si">%.3f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">time_start</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cross_validate</span><span class="p">(</span><span class="n">torch_dataset</span><span class="o">=</span><span class="n">imdb</span><span class="p">,</span>
+               <span class="n">outer_kfold</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+               <span class="n">num_outer_epochs</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+               <span class="n">inner_kfold</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+               <span class="n">num_inner_epochs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+               <span class="n">criterion</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">BCEWithLogitsLoss</span><span class="p">(),</span>
+               <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+               <span class="n">lr_params</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span>
+               <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span><span class="p">),</span>
+               <span class="n">nested</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Outer Fold 1/3:
+  Inner Fold 1/3:
+    Grid Search: lr = 0.01 ... Done.
+                 lr = 0.03 ... Done.
+                 lr = 0.1 ... Done.
+  Inner Fold 2/3:
+    Grid Search: lr = 0.01 ... Done.
+                 lr = 0.03 ... Done.
+                 lr = 0.1 ... Done.
+  Inner Fold 3/3:
+    Grid Search: lr = 0.01 ... Done.
+                 lr = 0.03 ... Done.
+                 lr = 0.1 ... Done.
+  Best Learning Rate: lr = 0.01
+  Epoch 01 | Train Loss: 0.626 | Train Acc: 45.68% | Test Loss: 0.691 | Test Acc: 51.66%
+  Epoch 02 | Train Loss: 0.623 | Train Acc: 46.80% | Test Loss: 0.690 | Test Acc: 52.88%
+  Epoch 03 | Train Loss: 0.621 | Train Acc: 47.77% | Test Loss: 0.690 | Test Acc: 53.37%
+  Epoch 04 | Train Loss: 0.620 | Train Acc: 47.91% | Test Loss: 0.689 | Test Acc: 53.47%
+  Epoch 05 | Train Loss: 0.620 | Train Acc: 48.28% | Test Loss: 0.689 | Test Acc: 53.54%
+  Epoch 06 | Train Loss: 0.618 | Train Acc: 48.72% | Test Loss: 0.689 | Test Acc: 53.84%
+  Epoch 07 | Train Loss: 0.618 | Train Acc: 48.83% | Test Loss: 0.688 | Test Acc: 54.19%
+  Epoch 08 | Train Loss: 0.617 | Train Acc: 49.33% | Test Loss: 0.687 | Test Acc: 54.55%
+  Epoch 09 | Train Loss: 0.615 | Train Acc: 49.69% | Test Loss: 0.687 | Test Acc: 54.98%
+  Epoch 10 | Train Loss: 0.614 | Train Acc: 50.14% | Test Loss: 0.683 | Test Acc: 55.44%
+  Epoch 11 | Train Loss: 0.611 | Train Acc: 50.76% | Test Loss: 0.683 | Test Acc: 56.53%
+  Epoch 12 | Train Loss: 0.606 | Train Acc: 52.55% | Test Loss: 0.682 | Test Acc: 58.52%
+  Epoch 13 | Train Loss: 0.605 | Train Acc: 52.97% | Test Loss: 0.659 | Test Acc: 61.80%
+  Epoch 14 | Train Loss: 0.604 | Train Acc: 52.98% | Test Loss: 0.690 | Test Acc: 54.38%
+  Epoch 15 | Train Loss: 0.602 | Train Acc: 53.55% | Test Loss: 0.678 | Test Acc: 58.10%
+
+Outer Fold 2/3:
+  Inner Fold 1/3:
+    Grid Search: lr = 0.01 ... Done.
+                 lr = 0.03 ... Done.
+                 lr = 0.1 ... Done.
+  Inner Fold 2/3:
+    Grid Search: lr = 0.01 ... Done.
+                 lr = 0.03 ... Done.
+                 lr = 0.1 ... Done.
+  Inner Fold 3/3:
+    Grid Search: lr = 0.01 ... Done.
+                 lr = 0.03 ... Done.
+                 lr = 0.1 ... Done.
+  Best Learning Rate: lr = 0.01
+  Epoch 01 | Train Loss: 0.626 | Train Acc: 45.85% | Test Loss: 0.698 | Test Acc: 48.06%
+  Epoch 02 | Train Loss: 0.623 | Train Acc: 46.93% | Test Loss: 0.700 | Test Acc: 47.52%
+  Epoch 03 | Train Loss: 0.622 | Train Acc: 47.60% | Test Loss: 0.700 | Test Acc: 47.63%
+  Epoch 04 | Train Loss: 0.621 | Train Acc: 47.68% | Test Loss: 0.700 | Test Acc: 47.61%
+  Epoch 05 | Train Loss: 0.620 | Train Acc: 48.44% | Test Loss: 0.702 | Test Acc: 47.56%
+  Epoch 06 | Train Loss: 0.619 | Train Acc: 48.50% | Test Loss: 0.702 | Test Acc: 47.84%
+  Epoch 07 | Train Loss: 0.619 | Train Acc: 48.77% | Test Loss: 0.703 | Test Acc: 46.99%
+  Epoch 08 | Train Loss: 0.617 | Train Acc: 49.03% | Test Loss: 0.704 | Test Acc: 46.81%
+  Epoch 09 | Train Loss: 0.617 | Train Acc: 49.24% | Test Loss: 0.704 | Test Acc: 46.35%
+  Epoch 10 | Train Loss: 0.617 | Train Acc: 49.40% | Test Loss: 0.707 | Test Acc: 46.59%
+  Epoch 11 | Train Loss: 0.616 | Train Acc: 49.74% | Test Loss: 0.711 | Test Acc: 45.71%
+  Epoch 12 | Train Loss: 0.615 | Train Acc: 49.88% | Test Loss: 0.716 | Test Acc: 45.17%
+  Epoch 13 | Train Loss: 0.613 | Train Acc: 50.22% | Test Loss: 0.726 | Test Acc: 43.55%
+  Epoch 14 | Train Loss: 0.612 | Train Acc: 51.15% | Test Loss: 0.758 | Test Acc: 41.35%
+  Epoch 15 | Train Loss: 0.609 | Train Acc: 51.62% | Test Loss: 0.761 | Test Acc: 44.50%
+
+Outer Fold 3/3:
+  Inner Fold 1/3:
+    Grid Search: lr = 0.01 ... Done.
+                 lr = 0.03 ... Done.
+                 lr = 0.1 ... Done.
+  Inner Fold 2/3:
+    Grid Search: lr = 0.01 ... Done.
+                 lr = 0.03 ... Done.
+                 lr = 0.1 ... Done.
+  Inner Fold 3/3:
+    Grid Search: lr = 0.01 ... Done.
+                 lr = 0.03 ... Done.
+                 lr = 0.1 ... Done.
+  Best Learning Rate: lr = 0.01
+  Epoch 01 | Train Loss: 0.626 | Train Acc: 46.14% | Test Loss: 0.698 | Test Acc: 48.65%
+  Epoch 02 | Train Loss: 0.624 | Train Acc: 46.97% | Test Loss: 0.699 | Test Acc: 48.49%
+  Epoch 03 | Train Loss: 0.622 | Train Acc: 47.19% | Test Loss: 0.701 | Test Acc: 47.64%
+  Epoch 04 | Train Loss: 0.622 | Train Acc: 47.65% | Test Loss: 0.701 | Test Acc: 47.91%
+  Epoch 05 | Train Loss: 0.621 | Train Acc: 47.72% | Test Loss: 0.702 | Test Acc: 47.06%
+  Epoch 06 | Train Loss: 0.621 | Train Acc: 47.92% | Test Loss: 0.702 | Test Acc: 46.86%
+  Epoch 07 | Train Loss: 0.619 | Train Acc: 48.62% | Test Loss: 0.704 | Test Acc: 45.71%
+  Epoch 08 | Train Loss: 0.619 | Train Acc: 48.35% | Test Loss: 0.705 | Test Acc: 46.84%
+  Epoch 09 | Train Loss: 0.618 | Train Acc: 48.87% | Test Loss: 0.707 | Test Acc: 46.54%
+  Epoch 10 | Train Loss: 0.619 | Train Acc: 48.47% | Test Loss: 0.708 | Test Acc: 44.74%
+  Epoch 11 | Train Loss: 0.618 | Train Acc: 49.13% | Test Loss: 0.710 | Test Acc: 44.42%
+  Epoch 12 | Train Loss: 0.616 | Train Acc: 49.34% | Test Loss: 0.716 | Test Acc: 44.36%
+  Epoch 13 | Train Loss: 0.615 | Train Acc: 49.98% | Test Loss: 0.728 | Test Acc: 42.43%
+  Epoch 14 | Train Loss: 0.614 | Train Acc: 50.57% | Test Loss: 0.770 | Test Acc: 41.77%
+  Epoch 15 | Train Loss: 0.611 | Train Acc: 51.32% | Test Loss: 0.731 | Test Acc: 45.79%
+
+Mean Test Loss: 0.723
+Mean Test Acc: 49.46%
+Training time: 2544.277s
+</pre></div>
+</div>
+</div>
+</div>
+<p>Here we see that the mean test accuracy is much lower than without using nested CV. While the first outer fold performed fairly well, the second and third folds did not. Nested CV was able to give a better, less biased evaluation of our model than with a train/val/test split, though at the expense of a much longer computation time. 3 folds is also less than ideal, as 5 or 10 folds are generally preferred. The number of folds and epochs were only chosen to achieve a realistic computation time, as this project is primarily a proof of concept.</p>
+<p>Now that we know the RNN model needs to be improved, we’ll explore using an LSTM model in the next section.</p>
+</div>
+
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+    <a class='left-prev' id="prev-link" href="../mnist/mnist_pytorch.html" title="previous page">MNIST with PyTorch</a>
+    <a class='right-next' id="next-link" href="imdb_lstm.html" title="next page">IMDb with LSTMs</a>
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By Jason Liu<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    <script src="../_static/js/index.js"></script>
+    
+  </body>
+</html>

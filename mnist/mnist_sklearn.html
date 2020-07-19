@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers &#8212; Jason Liu</title>
+    <title>MNIST with Scikit-Learn &#8212; Jason Liu</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
     <link href="../_static/css/index.css" rel="stylesheet">
     <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
@@ -31,7 +31,7 @@
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Machine Learning in PyTorch" href="mnist_pytorch.html" />
+    <link rel="next" title="MNIST with PyTorch" href="mnist_pytorch.html" />
     <link rel="prev" title="About Me" href="../intro.html" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -65,24 +65,46 @@
 </form>
 
 <nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  
-  <ul class="nav sidenav_l1">
-<li class="navbar-special">
-<p class="margin-caption">Machine Learning with MNIST</p>
-</li>
-  <li class="active">
-    <a href="">When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers</a>
-  </li>
-  <li class="">
-    <a href="mnist_pytorch.html">Machine Learning in PyTorch</a>
-  </li>
-<li class="navbar-special">
-<p class="margin-caption">Large Movie Review Dataset</p>
-</li>
-  <li class="">
-    <a href="../movie/movie.html">Movie Review Semantic Analysis</a>
-  </li>
+  <p class="caption">
+ <span class="caption-text">
+  MNIST Digit Classification
+ </span>
+</p>
+<ul class="current nav sidenav_l1">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   MNIST with Scikit-Learn
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="mnist_pytorch.html">
+   MNIST with PyTorch
+  </a>
+ </li>
 </ul>
+<p class="caption">
+ <span class="caption-text">
+  IMDb Sentiment Analysis
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../imdb/imdb_rnn.html">
+   IMDb with Vanilla RNNs
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../imdb/imdb_rnn.html#nested-cross-validation">
+   Nested Cross Validation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../imdb/imdb_lstm.html">
+   IMDb with LSTMs
+  </a>
+ </li>
+</ul>
+
 </nav>
 
  <!-- To handle the deprecated key -->
@@ -157,103 +179,112 @@
         <!-- Launch buttons -->
 
     </div>
+
+    <!-- Table of contents -->
     <div class="d-none d-md-block col-md-2 bd-toc show">
-<div class="tocsection onthispage pt-5 pb-3">
-    <i class="fas fa-list"></i> On this page
-</div>
-
-<nav id="bd-toc-nav">
-    <ul class="nav section-nav flex-column">
-    
-        <li class="nav-item toc-entry toc-h2">
-            <a href="#mnist-dataset" class="nav-link">MNIST Dataset</a>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h2">
-            <a href="#logistic-regression" class="nav-link">Logistic Regression</a>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h2">
-            <a href="#support-vector-machines" class="nav-link">Support Vector Machines</a><ul class="nav section-nav flex-column">
-                
-        <li class="nav-item toc-entry toc-h3">
-            <a href="#linear-kernel" class="nav-link">Linear Kernel</a>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h3">
-            <a href="#polynomial-kernel" class="nav-link">Polynomial Kernel</a>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h3">
-            <a href="#rbf-kernel" class="nav-link">RBF Kernel</a>
-        </li>
-    
-            </ul>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h2">
-            <a href="#naive-bayes-classifiers" class="nav-link">Naive Bayes Classifiers</a><ul class="nav section-nav flex-column">
-                
-        <li class="nav-item toc-entry toc-h3">
-            <a href="#gaussian-naive-bayes" class="nav-link">Gaussian Naive Bayes</a>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h3">
-            <a href="#multinomial-naive-bayes" class="nav-link">Multinomial Naive Bayes</a>
-        </li>
-    
-            </ul>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h2">
-            <a href="#analysis-which-classifier-to-use" class="nav-link">Analysis: Which Classifier to Use</a>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h2">
-            <a href="#other-classifiers" class="nav-link">Other Classifiers</a><ul class="nav section-nav flex-column">
-                
-        <li class="nav-item toc-entry toc-h3">
-            <a href="#ensemble-methods" class="nav-link">Ensemble Methods</a><ul class="nav section-nav flex-column">
-                
-        <li class="nav-item toc-entry toc-h4">
-            <a href="#random-forest-classifier" class="nav-link">Random Forest Classifier</a>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h4">
-            <a href="#gradient-boosting-classifier" class="nav-link">Gradient Boosting Classifier</a>
-        </li>
-    
-            </ul>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h3">
-            <a href="#neural-networks" class="nav-link">Neural Networks</a><ul class="nav section-nav flex-column">
-                
-        <li class="nav-item toc-entry toc-h4">
-            <a href="#multi-layer-perceptron" class="nav-link">Multi-layer Perceptron</a>
-        </li>
-    
-            </ul>
-        </li>
-    
-        <li class="nav-item toc-entry toc-h3">
-            <a href="#comparison-with-logistic-regression-svms-and-naive-bayes" class="nav-link">Comparison With Logistic Regression, SVMs, and Naive Bayes</a>
-        </li>
-    
-            </ul>
-        </li>
-    
-    </ul>
-</nav>
-
-
-
-<div class="tocsection editthispage">
-    <a href="https://github.com/jasoneliu/pessoalab/edit/master/mnist/mnist_sklearn.ipynb">
-        <i class="fas fa-pencil-alt"></i> Edit this page
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> On this page
+        </div>
+        <nav id="bd-toc-nav">
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#mnist-dataset">
+   MNIST Dataset
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#logistic-regression">
+   Logistic Regression
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#support-vector-machines">
+   Support Vector Machines
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#linear-kernel">
+     Linear Kernel
     </a>
-</div>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#polynomial-kernel">
+     Polynomial Kernel
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#rbf-kernel">
+     RBF Kernel
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#naive-bayes-classifiers">
+   Naive Bayes Classifiers
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#gaussian-naive-bayes">
+     Gaussian Naive Bayes
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#multinomial-naive-bayes">
+     Multinomial Naive Bayes
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#analysis-which-classifier-to-use">
+   Analysis: Which Classifier to Use
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#other-classifiers">
+   Other Classifiers
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#ensemble-methods">
+     Ensemble Methods
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#random-forest-classifier">
+       Random Forest Classifier
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#gradient-boosting-classifier">
+       Gradient Boosting Classifier
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#neural-networks">
+     Neural Networks
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#multi-layer-perceptron">
+       Multi-layer Perceptron
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#comparison-with-logistic-regression-svms-and-naive-bayes">
+     Comparison With Logistic Regression, SVMs, and Naive Bayes
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
 
+        </nav>
     </div>
 </div>
     <div id="main-content" class="row">
@@ -261,16 +292,16 @@
         
               <div>
                 
-  <div class="section" id="when-to-use-logistic-regression-vs-support-vector-machines-vs-naive-bayes-classifiers">
-<h1>When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers<a class="headerlink" href="#when-to-use-logistic-regression-vs-support-vector-machines-vs-naive-bayes-classifiers" title="Permalink to this headline">¶</a></h1>
-<p>6/30/2020</p>
-<p>In classification problems, a variety of supervised learning techniques can be used. In this report, we evaluate the benefits and drawbacks of three common classifiers using the MNIST dataset and scikit-learn, a python machine learning library.</p>
+  <div class="section" id="mnist-with-scikit-learn">
+<h1>MNIST with Scikit-Learn<a class="headerlink" href="#mnist-with-scikit-learn" title="Permalink to this headline">¶</a></h1>
+<p><strong>6/30/2020</strong></p>
+<p>In classification problems, a variety of supervised learning techniques can be effectively used. In this report, we evaluate the advantages and drawbacks of three common classifiers using the MNIST dataset and scikit-learn, a python machine learning library. In doing so, we hope to answer the question of <strong>“When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers”</strong></p>
 <div class="section" id="mnist-dataset">
 <h2>MNIST Dataset<a class="headerlink" href="#mnist-dataset" title="Permalink to this headline">¶</a></h2>
 <p>The MNIST dataset is a collection of 70,000 28x28 pixel grayscale images of handwritten digits (0-9), with each pixel corresponding to an integer between 0 (black) and 255 (white).</p>
-<p>For classification, each pixel will be a feature. Feature scaling is used to constrain features between 0.0 and 1.0. Since the digits are distributed fairly evenly, accuracy can be used to evaluate the model rather than precision, recall, or F1 score.</p>
-<p>The dataset is split into two datasets: one full size dataset (70,000 images), one 10% size dataset (7,000 images)<br />
-Each dataset is split into sets:</p>
+<p>The goal is to create a model that can accurately predict the digit contained in given image. For this classification task, each pixel will be a feature. Feature scaling is used to constrain features between 0.0 and 1.0. Since the digits are distributed fairly evenly, accuracy can be used to evaluate the model rather than precision, recall, or F1 score.</p>
+<p>We can create two datasets of different sizes: one full-sized dataset (70,000 images) and one 10%-sized dataset (7,000 images)<br />
+Each dataset is then split into sets:</p>
 <ul class="simple">
 <li><p>70% training - train model / set parameters</p>
 <ul>
@@ -299,7 +330,7 @@ Each dataset is split into sets:</p>
 </div>
 </div>
 </div>
-<p>The full MNIST dataset needs to normalized and split into training and validation sets. We can also show some examples of the handwritten digits in the dataset:</p>
+<p>The full MNIST dataset needs to normalized with feature scaling then split into training and validation sets. We can also show some examples of the handwritten digits in the dataset:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s1">&#39;mnist_784&#39;</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -331,7 +362,7 @@ Each dataset is split into sets:</p>
 <p>Classification is determined based on the greater probability between <span class="math notranslate nohighlight">\(P(y=0|x)\)</span> and <span class="math notranslate nohighlight">\(P(y=1|x)\)</span>. The decision boundary is created at an equal probability of both classes, which occurs at <span class="math notranslate nohighlight">\(h_\theta(x)=0.5\)</span> or <span class="math notranslate nohighlight">\(\theta^Tx=0\)</span>. Though typically linear, this decision boundary can become non-linear by creating new features that are polynomial terms of previous features.</p>
 <p>A cost function <span class="math notranslate nohighlight">\(J(\theta)\)</span> is defined to measure the error in the model’s classification accuracy across all training examples. The model minimizes <span class="math notranslate nohighlight">\(J(\theta)\)</span> using an optimization algorithm such as gradient descent or L-BFGS in order to find the <span class="math notranslate nohighlight">\(\theta\)</span> that results in the lowest cost or greatest classification accuracy. Regularization is applied to address overfitting. An extra term called a penalty is added to <span class="math notranslate nohighlight">\(J(\theta)\)</span>, though it also introduces a hyperparameter <span class="math notranslate nohighlight">\(C\)</span> that needs to be optimized as well.</p>
 <p>In multiclass classification, the one-vs-rest method is used. All classes except for one are grouped together into one class, creating two classes and allowing for binary classification. This process repeats for all individual classes and the model predics the class with the greatest <span class="math notranslate nohighlight">\(P(y|x)\)</span>.</p>
-<p>We start by finding the best hyperparameters (primarily learning rate) for our logistic regression model using a grid search:</p>
+<p>We start by finding the best hyperparameters (primarily learning rate) for our logistic regression model. This can be done using a grid search, which uses a given list of hyperparameters to find the one that yields the highest accuracy or lowest loss:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">grid</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
@@ -360,7 +391,7 @@ Best parameters: {&#39;C&#39;: 0.33, &#39;max_iter&#39;: 50, &#39;multi_class&#3
 </div>
 </div>
 </div>
-<p>Now we let our model train on a training set, then test its accuracy on a validation set:</p>
+<p>Now we let our model train on a training set, then we can test its accuracy on a validation set:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">clf</span><span class="p">):</span>
@@ -743,7 +774,7 @@ Small dataset:
     <div class='prev-next-bottom'>
         
     <a class='left-prev' id="prev-link" href="../intro.html" title="previous page">About Me</a>
-    <a class='right-next' id="next-link" href="mnist_pytorch.html" title="next page">Machine Learning in PyTorch</a>
+    <a class='right-next' id="next-link" href="mnist_pytorch.html" title="next page">MNIST with PyTorch</a>
 
     </div>
     <footer class="footer mt-5 mt-md-0">

@@ -68,24 +68,46 @@
 </form>
 
 <nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  
-  <ul class="nav sidenav_l1">
-<li class="navbar-special">
-<p class="margin-caption">Machine Learning with MNIST</p>
-</li>
-  <li class="">
-    <a href="mnist/mnist_sklearn.html">When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers</a>
-  </li>
-  <li class="">
-    <a href="mnist/mnist_pytorch.html">Machine Learning in PyTorch</a>
-  </li>
-<li class="navbar-special">
-<p class="margin-caption">Large Movie Review Dataset</p>
-</li>
-  <li class="">
-    <a href="movie/movie.html">Movie Review Semantic Analysis</a>
-  </li>
+  <p class="caption">
+ <span class="caption-text">
+  MNIST Digit Classification
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="mnist/mnist_sklearn.html">
+   MNIST with Scikit-Learn
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="mnist/mnist_pytorch.html">
+   MNIST with PyTorch
+  </a>
+ </li>
 </ul>
+<p class="caption">
+ <span class="caption-text">
+  IMDb Sentiment Analysis
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="imdb/imdb_rnn.html">
+   IMDb with Vanilla RNNs
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="imdb/imdb_rnn.html#nested-cross-validation">
+   Nested Cross Validation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="imdb/imdb_lstm.html">
+   IMDb with LSTMs
+  </a>
+ </li>
+</ul>
+
 </nav>
 
  <!-- To handle the deprecated key -->
@@ -146,15 +168,12 @@
         <!-- Launch buttons -->
 
     </div>
+
+    <!-- Table of contents -->
     <div class="d-none d-md-block col-md-2 bd-toc show">
-
-<nav id="bd-toc-nav">
-    <ul class="nav section-nav flex-column">
-    
-    </ul>
-</nav>
-
-
+        <nav id="bd-toc-nav">
+            
+        </nav>
     </div>
 </div>
     <div id="main-content" class="row">

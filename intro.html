@@ -31,7 +31,7 @@
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers" href="mnist/mnist_sklearn.html" />
+    <link rel="next" title="MNIST with Scikit-Learn" href="mnist/mnist_sklearn.html" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="docsearch:language" content="en">
@@ -64,24 +64,46 @@
 </form>
 
 <nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  
-  <ul class="nav sidenav_l1">
-<li class="navbar-special">
-<p class="margin-caption">Machine Learning with MNIST</p>
-</li>
-  <li class="">
-    <a href="mnist/mnist_sklearn.html">When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers</a>
-  </li>
-  <li class="">
-    <a href="mnist/mnist_pytorch.html">Machine Learning in PyTorch</a>
-  </li>
-<li class="navbar-special">
-<p class="margin-caption">Large Movie Review Dataset</p>
-</li>
-  <li class="">
-    <a href="movie/movie.html">Movie Review Semantic Analysis</a>
-  </li>
+  <p class="caption">
+ <span class="caption-text">
+  MNIST Digit Classification
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="mnist/mnist_sklearn.html">
+   MNIST with Scikit-Learn
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="mnist/mnist_pytorch.html">
+   MNIST with PyTorch
+  </a>
+ </li>
 </ul>
+<p class="caption">
+ <span class="caption-text">
+  IMDb Sentiment Analysis
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="imdb/imdb_rnn.html">
+   IMDb with Vanilla RNNs
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="imdb/imdb_rnn.html#nested-cross-validation">
+   Nested Cross Validation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="imdb/imdb_lstm.html">
+   IMDb with LSTMs
+  </a>
+ </li>
+</ul>
+
 </nav>
 
  <!-- To handle the deprecated key -->
@@ -156,22 +178,15 @@
         <!-- Launch buttons -->
 
     </div>
+
+    <!-- Table of contents -->
     <div class="d-none d-md-block col-md-2 bd-toc show">
-
-<nav id="bd-toc-nav">
-    <ul class="nav section-nav flex-column">
-    
-    </ul>
-</nav>
-
-
-
-<div class="tocsection editthispage">
-    <a href="https://github.com/jasoneliu/pessoalab/edit/master/intro.md">
-        <i class="fas fa-pencil-alt"></i> Edit this page
-    </a>
-</div>
-
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> On this page
+        </div>
+        <nav id="bd-toc-nav">
+            
+        </nav>
     </div>
 </div>
     <div id="main-content" class="row">
@@ -181,7 +196,7 @@
                 
   <div class="section" id="about-me">
 <h1>About Me<a class="headerlink" href="#about-me" title="Permalink to this headline">¶</a></h1>
-<p>I’m Jason Liu, a senior at Montgomery Blair High School. During the summer of 2020, I worked as an intern at the <a class="reference external" href="http://www.lce.umd.edu/index.html">Laboratory of Cognition &amp; Emotion</a> at the University of Maryland under Dr. Luiz Pessoa, where I worked on using machine learning and neural networks to analyze brain data. This website serves as a documentation of all work that I have done during this internship.</p>
+<p>Hi, I’m Jason Liu. I am currently a senior (class of 2021) at Montgomery Blair High School. In the summer of 2020, I worked as an intern for the <a class="reference external" href="http://www.lce.umd.edu/index.html">Laboratory of Cognition &amp; Emotion</a> at the University of Maryland under Dr. Luiz Pessoa. During this time, I worked on developing machine learning models and neural networks to analyze brain data. This website serves as a documentation of the work that I have done during this internship.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
@@ -197,7 +212,7 @@
     
     <div class='prev-next-bottom'>
         
-    <a class='right-next' id="next-link" href="mnist/mnist_sklearn.html" title="next page">When to use Logistic Regression vs Support Vector Machines vs Naive Bayes classifiers</a>
+    <a class='right-next' id="next-link" href="mnist/mnist_sklearn.html" title="next page">MNIST with Scikit-Learn</a>
 
     </div>
     <footer class="footer mt-5 mt-md-0">
